@@ -1,0 +1,392 @@
+#
+# OS status fingerprint.
+#
+
+# This detection identifies attempts to gather operating system status information
+# by monitoring access to files that contain system state, process information,
+# and kernel details. This activity is often performed during reconnaissance
+# phases to understand the current state of the target system.
+
+- kind: os_status_fingerprint
+  name: os_status_fingerprint_critical
+  enabled: false
+  version: 1.0
+  description: OS status fingerprint
+  documentation: |
+    https://garnet.gitbook.io/jibril/detections/file-access/os_status_fingerprint
+  breed: file_access
+  mechanism: file_access
+  tactic: discovery
+  technique: system_information_discovery
+  subtechnique: none
+  importance: critical
+  times:
+    - kind: times_per_proc
+      max: 1
+    - kind: times_per_exe
+      max: 1
+    - kind: times_per_full_ancestry
+      max: 1
+  arbitrary: []
+  file_actions: access_related
+  file_actions_how: any
+  bases:
+    - dir: /proc
+      base: kallsyms # Kernel symbols.
+    - dir: /proc
+      base: kcore # Kernel core dump.
+    - dir: /proc
+      base: kpageflags # Kernel page flags.
+    - dir: /proc
+      base: kmem # Kernel memory information.
+
+# OS status fingerprint (high).
+
+- kind: os_status_fingerprint
+  name: os_status_fingerprint_high
+  enabled: false
+  version: 1.0
+  description: OS status fingerprint
+  documentation: |
+    https://garnet.gitbook.io/jibril/detections/file-access/os_status_fingerprint
+  breed: file_access
+  mechanism: file_access
+  tactic: discovery
+  technique: system_information_discovery
+  subtechnique: none
+  importance: high
+  times:
+    - kind: times_per_proc
+      max: 1
+    - kind: times_per_exe
+      max: 1
+    - kind: times_per_full_ancestry
+      max: 1
+  arbitrary: []
+  file_actions: access_related
+  file_actions_how: any
+  bases:
+    - dir: /proc
+      base: key-users # Kernel key mgmt information.
+    - dir: /proc
+      base: keys # Kernel key mgmt information.
+    - dir: /proc
+      base: kmsg # Kernel log messages.
+    - dir: /proc
+      base: meminfo # Freq. access could mean side ch.
+    - dir: /proc
+      base: vmallocinfo # Exposes vmalloc stats.
+    - dir: /proc
+      base: self # Symbolic link to current process.
+    - dir: /proc/sys/kernel
+      base: randomize_va_space # ASLR configuration.
+    - dir: /proc/sys/kernel
+      base: kptr_restrict # Kernel pointer restriction.
+
+# OS status fingerprint (medium).
+
+- kind: os_status_fingerprint
+  name: os_status_fingerprint_medium
+  enabled: false
+  version: 1.0
+  description: OS status fingerprint
+  documentation: |
+    https://garnet.gitbook.io/jibril/detections/file-access/os_status_fingerprint
+  breed: file_access
+  mechanism: file_access
+  tactic: discovery
+  technique: system_information_discovery
+  subtechnique: none
+  importance: medium
+  times:
+    - kind: times_per_proc
+      max: 1
+    - kind: times_per_exe
+      max: 1
+    - kind: times_per_full_ancestry
+      max: 1
+  arbitrary: []
+  file_actions: access_related
+  file_actions_how: any
+  bases:
+    - dir: /proc
+      base: slabinfo # Exposes slabcache stats.
+    - dir: /proc
+      base: schedstat # Exposes scheduling patterns.
+    - dir: /proc
+      base: pressure # Resource pressure information.
+    - dir: /proc/sys/fs
+      base: file-max # Maximum number of file handles.
+
+# OS status fingerprint (low).
+
+- kind: os_status_fingerprint
+  name: os_status_fingerprint_low
+  enabled: false
+  version: 1.0
+  description: OS status fingerprint
+  documentation: |
+    https://garnet.gitbook.io/jibril/detections/file-access/os_status_fingerprint
+  breed: file_access
+  mechanism: file_access
+  tactic: discovery
+  technique: system_information_discovery
+  subtechnique: none
+  importance: low
+  times:
+    - kind: times_per_proc
+      max: 1
+    - kind: times_per_exe
+      max: 1
+    - kind: times_per_full_ancestry
+      max: 1
+  arbitrary: []
+  file_actions: access_related
+  file_actions_how: any
+  bases:
+    - dir: /proc
+      base: buddyinfo
+    - dir: /proc
+      base: cgroups
+    - dir: /proc
+      base: crypto
+    - dir: /proc
+      base: execdomains
+    - dir: /proc
+      base: loadavg
+    - dir: /proc
+      base: misc
+    - dir: /proc
+      base: mtrr
+    - dir: /proc
+      base: pagetypeinfo
+    - dir: /proc
+      base: softirqs
+    - dir: /proc
+      base: stat
+    - dir: /proc
+      base: timer_list
+    - dir: /proc
+      base: uptime
+    - dir: /proc
+      base: vmstat
+    - dir: /proc
+      base: zoneinfo
+    - dir: /proc
+      base: version # Kernel version information.
+
+# OS status fingerprint (pid high).
+
+- kind: os_status_fingerprint
+  name: os_status_fingerprint_pid_high
+  enabled: false
+  version: 1.0
+  description: OS status fingerprint
+  documentation: |
+    https://garnet.gitbook.io/jibril/detections/file-access/os_status_fingerprint
+  breed: file_access
+  mechanism: file_access
+  tactic: discovery
+  technique: system_information_discovery
+  subtechnique: none
+  importance: high
+  times:
+    - kind: times_per_proc
+      max: 1
+    - kind: times_per_exe
+      max: 1
+    - kind: times_per_full_ancestry
+      max: 1
+  arbitrary: []
+  file_actions: access_related
+  file_actions_how: any
+  bases:
+    - regex: ^/proc/[0-9]+/cmdline$ # Cmdline args for cmds.
+    - regex: ^/proc/[0-9]+/exe$ # The executable path.
+    - regex: ^/proc/[0-9]+/maps$ # Process memory mappings.
+    - regex: ^/proc/[0-9]+/mem$ # Process memory access.
+    - regex: ^/proc/[0-9]+/syscall$ # Current syscall information.
+    - regex: ^/proc/[0-9]+/fd/.*$ # Process file descriptors.
+
+# OS status fingerprint (pid medium).
+
+- kind: os_status_fingerprint
+  name: os_status_fingerprint_pid_medium
+  enabled: false
+  version: 1.0
+  description: OS status fingerprint
+  documentation: |
+    https://garnet.gitbook.io/jibril/detections/file-access/os_status_fingerprint
+  breed: file_access
+  mechanism: file_access
+  tactic: discovery
+  technique: system_information_discovery
+  subtechnique: none
+  importance: medium
+  times:
+    - kind: times_per_proc
+      max: 1
+    - kind: times_per_exe
+      max: 1
+    - kind: times_per_full_ancestry
+      max: 1
+  arbitrary: []
+  file_actions: access_related
+  file_actions_how: any
+  bases:
+    - regex: ^/proc/[0-9]+/io$ # I/O usage of each process.
+    - regex: ^/proc/[0-9]+/limits$ # Process resource limits.
+    - regex: ^/proc/[0-9]+/stat$ # Frequent access: profiling.
+    - regex: ^/proc/[0-9]+/statm$ # Frequent access: profiling.
+    - regex: ^/proc/[0-9]+/comm$ # The command name.
+    - regex: ^/proc/[0-9]+/task$ # Process thread information.
+    - regex: ^/proc/[0-9]+/smaps$ # Detailed memory map information.
+    - regex: ^/proc/[0-9]+/ns/.*$ # Process namespace information.
+
+# OS status fingerprint (pid low).
+
+- kind: os_status_fingerprint
+  name: os_status_fingerprint_pid_low
+  enabled: false
+  version: 1.0
+  description: OS status fingerprint
+  documentation: |
+    https://garnet.gitbook.io/jibril/detections/file-access/os_status_fingerprint
+  breed: file_access
+  mechanism: file_access
+  tactic: discovery
+  technique: system_information_discovery
+  subtechnique: none
+  importance: low
+  times:
+    - kind: times_per_proc
+      max: 1
+    - kind: times_per_exe
+      max: 1
+    - kind: times_per_full_ancestry
+      max: 1
+  arbitrary: []
+  file_actions: access_related
+  file_actions_how: any
+  bases:
+    - regex: ^/proc/[0-9]+/cgroup$ # Process cgroup information.
+    - regex: ^/proc/[0-9]+/status$ # Not typical sensitive data.
+    - regex: ^/proc/[0-9]+/wchan$ # Wait channel information.
+    - regex: ^/proc/[0-9]+/oom_score$ # OOM killer score.
+    - regex: ^/proc/[0-9]+/loginuid$ # Login user ID.
+
+# OS status fingerprint (sys vm).
+
+- kind: os_status_fingerprint
+  name: os_status_fingerprint_sys_vm
+  enabled: false
+  version: 1.0
+  description: OS status fingerprint
+  documentation: |
+    https://garnet.gitbook.io/jibril/detections/file-access/os_status_fingerprint
+  breed: file_access
+  mechanism: file_access
+  tactic: discovery
+  technique: system_information_discovery
+  subtechnique: none
+  importance: low
+  times:
+    - kind: times_per_proc
+      max: 1
+    - kind: times_per_exe
+      max: 1
+    - kind: times_per_full_ancestry
+      max: 1
+  arbitrary: []
+  file_actions: access_related
+  file_actions_how: any
+  bases:
+    - dir: /proc/sys/vm
+
+# OS status fingerprint (sys kernel).
+
+- kind: os_status_fingerprint
+  name: os_status_fingerprint_sys_kernel
+  enabled: false
+  version: 1.0
+  description: OS status fingerprint
+  documentation: |
+    https://garnet.gitbook.io/jibril/detections/file-access/os_status_fingerprint
+  breed: file_access
+  mechanism: file_access
+  tactic: discovery
+  technique: system_information_discovery
+  subtechnique: none
+  importance: low
+  times:
+    - kind: times_per_proc
+      max: 1
+    - kind: times_per_exe
+      max: 1
+    - kind: times_per_full_ancestry
+      max: 1
+  arbitrary: []
+  file_actions: access_related
+  file_actions_how: any
+  bases:
+    - dir: /proc/sys/kernel # Overlaps with some high importance files.
+
+# OS status fingerprint (sys security).
+
+- kind: os_status_fingerprint
+  name: os_status_fingerprint_sys_security
+  enabled: false
+  version: 1.0
+  description: OS status fingerprint
+  documentation: |
+    https://garnet.gitbook.io/jibril/detections/file-access/os_status_fingerprint
+  breed: file_access
+  mechanism: file_access
+  tactic: discovery
+  technique: system_information_discovery
+  subtechnique: none
+  importance: high
+  times:
+    - kind: times_per_proc
+      max: 1
+    - kind: times_per_exe
+      max: 1
+    - kind: times_per_full_ancestry
+      max: 1
+  arbitrary: []
+  file_actions: access_related
+  file_actions_how: any
+  bases:
+    - dir: /proc/sys/security
+
+# OS status fingerprint (security files).
+
+- kind: os_status_fingerprint
+  name: os_status_fingerprint_security_files
+  enabled: false
+  version: 1.0
+  description: OS status fingerprint
+  documentation: |
+    https://garnet.gitbook.io/jibril/detections/file-access/os_status_fingerprint
+  breed: file_access
+  mechanism: file_access
+  tactic: discovery
+  technique: system_information_discovery
+  subtechnique: none
+  importance: high
+  times:
+    - kind: times_per_proc
+      max: 1
+    - kind: times_per_exe
+      max: 1
+    - kind: times_per_full_ancestry
+      max: 1
+  arbitrary: []
+  file_actions: access_related
+  file_actions_how: any
+  bases:
+    - regex: /etc/security/.*$ # Security configuration files.
+    - regex: /etc/pam\.d/.*$ # PAM configuration files.
+    - regex: /etc/selinux/.*$ # SELinux configuration.
+    - regex: /etc/apparmor\.d/.*$ # AppArmor profiles.
+    - regex: /sys/kernel/security/.*$ # Kernel security subsystem.

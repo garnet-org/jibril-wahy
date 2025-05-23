@@ -1,0 +1,56 @@
+# Detect Conti ransomware process executions with specific command-line parameters.
+- kind: conti_common_exec_parameter
+  name: conti_common_exec_parameter
+  version: 1.0
+  description: Detects process executions with arguments indicative of Conti ransomware
+  documentation: |
+    # Quick Explanation
+    This detection identifies process executions with command-line arguments commonly used
+    by Conti ransomware, indicating potential encryption of local or network data.
+
+    # Analysis of the Event
+    The detection targets processes with arguments like `-m local`, `-m net`, `-m all`, or
+    `-nomutex`, which are characteristic of Conti ransomware operations. These parameters
+    instruct the ransomware to encrypt local drives, network shares, all accessible data,
+    or bypass mutex checks to avoid detection. The use of `file_actions: execve` ensures
+    the detection captures the execution of such processes, leveraging `arbitrary` rules
+    to filter specific command-line patterns.
+
+    # Implications
+    In CI/CD, staging, or production environments, detecting these executions suggests a
+    ransomware attack that could encrypt critical data, disrupt operations, or lead to
+    data loss. Conti ransomware often exfiltrates data before encryption, posing risks to
+    data confidentiality and integrity. In production, this could halt services, while in
+    CI/CD, it could compromise build pipelines or sensitive artifacts.
+
+    # Recommended Actions
+    Immediately isolate affected systems to prevent further encryption or lateral
+    movement. Investigate the process’s origin, parent process, and network activity to
+    identify the infection vector. Restore critical data from backups after verifying
+    their integrity. Deploy endpoint detection and response (EDR) tools to monitor for
+    similar executions. Update security policies to restrict unauthorized process
+    executions and enhance network share access controls.
+  breed: file_access
+  mechanism: execution
+  tactic: impact
+  technique: data_encryption_for_impact
+  subtechnique: none
+  importance: critical
+  times:
+    - kind: times_per_proc
+      max: 2
+    - kind: times_per_exe
+      max: 4
+    - kind: times_per_full_ancestry
+      max: 4
+  arbitrary:
+    - how: OR
+      which: irrelevant
+      items:
+        - what: args
+          which: pertinent
+          pattern: .*(-m\s+local|-m\s+net|-m\s+all|-nomutex).*
+  file_actions: execve
+  file_actions_how: any
+  bases:
+    - regex: .*

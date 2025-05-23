@@ -1,0 +1,57 @@
+# Detect attempts to exploit Baron Samedit (CVE-2021-3156) via sudoedit.
+- kind: detect_baron_samedit
+  name: detect_baron_samedit
+  version: 1.0
+  description: Detects Baron Samedit vulnerability (CVE-2021-3156).
+  documentation: |
+    # Quick Explanation
+    This detection identifies `sudoedit` command executions with the `-s \\` pattern, a
+    known indicator of attempts to exploit the Baron Samedit vulnerability (CVE-2021-3156)
+    for privilege escalation on Linux systems.
+
+    # Analysis of the Event
+    The detection focuses on `sudoedit` processes executed with the `-s` flag followed by
+    a backslash (`\\`), a specific pattern used to trigger a heap-based buffer overflow in
+    vulnerable sudo versions. The `file_actions: execve` captures these executions, and an
+    `arbitrary` rule filters for the exact command-line pattern `*-s\s+\\.*`. This
+    vulnerability allows unprivileged users to gain root access, making it a critical
+    threat.
+
+    # Implications
+    In CI/CD, staging, or production environments, successful exploitation could grant
+    attackers root privileges, enabling full system control, data theft, or deployment of
+    persistent threats. In CI/CD, this could compromise build pipelines or sensitive
+    credentials. In production, it could disrupt services, expose sensitive data, or
+    facilitate lateral movement within the network.
+
+    # Recommended Actions
+    Immediately isolate systems showing this execution pattern to prevent privilege
+    escalation. Verify the sudo version and patch to a non-vulnerable version (e.g., sudo
+    1.9.5p2 or later). Audit system logs for unauthorized `sudoedit` usage and check for
+    other signs of compromise. Implement endpoint monitoring to detect similar patterns
+    and restrict `sudoedit` execution to trusted users. Enforce least-privilege policies
+    to limit exposure.
+  breed: file_access
+  mechanism: execution
+  tactic: privilege_escalation
+  technique: abuse_elevation_control_mechanism
+  subtechnique: none
+  importance: critical
+  times:
+    - kind: times_per_proc
+      max: 2
+    - kind: times_per_exe
+      max: 4
+    - kind: times_per_full_ancestry
+      max: 4
+  arbitrary:
+    - how: AND
+      which: irrelevant
+      items:
+        - what: args
+          which: pertinent
+          pattern: .*-s\s+\\.*
+  file_actions: execve
+  file_actions_how: any
+  bases:
+    - base: sudoedit

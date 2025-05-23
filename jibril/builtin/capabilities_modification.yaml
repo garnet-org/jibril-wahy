@@ -1,0 +1,30 @@
+#
+# Capabilities file modification.
+#
+
+- kind: capabilities_modification
+  name: capabilities_modification
+  enabled: false
+  version: 1.0
+  description: Capabilities file modification
+  documentation: |
+    https://garnet.gitbook.io/jibril/detections/file-access/capabilities_modification
+  breed: file_access
+  mechanism: file_access
+  tactic: privilege_escalation
+  technique: abuse_elevation_control_mechanism
+  subtechnique: none
+  importance: critical
+  times:
+    - kind: times_per_proc
+      max: 2
+    - kind: times_per_exe
+      max: 4
+    - kind: times_per_full_ancestry
+      max: 4
+  arbitrary: []
+  file_actions: modify_related
+  file_actions_how: any
+  bases:
+    - dir: /etc/security
+      base: capability.conf

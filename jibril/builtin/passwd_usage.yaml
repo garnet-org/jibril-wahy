@@ -1,0 +1,47 @@
+#
+# Password related command usage.
+#
+
+- kind: passwd_usage
+  name: passwd_usage
+  enabled: false
+  version: 1.0
+  description: Passwd related command usage
+  documentation: |
+    https://garnet.gitbook.io/jibril/detections/execution/passwd_usage
+  breed: file_access
+  mechanism: execution
+  tactic: persistence
+  technique: account_manipulation
+  subtechnique: local_account
+  importance: high
+  times:
+    - kind: times_per_parent_proc
+      max: 2
+    - kind: times_per_parent_exe
+      max: 4
+    - kind: times_per_full_ancestry
+      max: 4
+  arbitrary: []
+  file_actions: execve
+  file_actions_how: any
+  bases:
+    - base: passwd
+    - base: chpasswd
+    - base: usermod
+    - base: groupmod
+    - base: gpasswd
+    - base: chage
+    - base: useradd
+    - base: groupadd
+    - base: userdel
+    - base: vipw
+    - base: vigr
+    - base: pwconv
+    - base: pwunconv
+    - base: grpconv
+    - base: grpunconv
+    - base: newusers
+    - base: chfn
+    - base: chsh
+    - base: smbpasswd

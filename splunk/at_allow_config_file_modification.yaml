@@ -1,0 +1,56 @@
+# Detect creation of at.allow or at.deny configuration files.
+- kind: at_allow_config_file_modification
+  name: at_allow_config_file_modification
+  version: 1.0
+  description: Detects creation of files indicating potential persistence or privilege escalation.
+  documentation: |
+    # Quick Explanation
+    This detection identifies file creation events for `/etc/at.allow` or `/etc/at.deny`,
+    which control user permissions for the `at` scheduling service, suggesting attempts to
+    establish persistence or escalate privileges.
+
+    # Analysis of the Event
+    The detection monitors filesystem events where `/etc/at.allow` or `/etc/at.deny` files
+    are created, as these files dictate which users can schedule tasks with the `at`
+    command. The `file_actions: modify_related` captures creation events, with `bases`
+    specifying the exact file paths. Creating these files could allow an attacker to grant
+    unauthorized users access to schedule malicious tasks, enabling persistent execution
+    or privilege escalation.
+
+    # Implications
+    In CI/CD, staging, or production environments, creation of these files could enable
+    attackers to schedule recurring malicious tasks, leading to persistent access, data
+    exfiltration, or system compromise. In CI/CD, this might disrupt build pipelines by
+    executing unauthorized scripts. In production, it could allow attackers to maintain
+    long-term control, execute destructive tasks, or escalate privileges, severely
+    impacting system security and operational continuity.
+
+    # Recommended Actions
+    Immediately investigate systems where these files are created to identify unauthorized
+    changes. Review the contents of `/etc/at.allow` and `/etc/at.deny` for malicious
+    entries and restore legitimate configurations. Analyze the process, user, and file
+    metadata to trace the attack vector. Enhance endpoint monitoring to detect similar
+    file creation events and restrict access to `/etc/` directories to trusted processes
+    and users. Implement file integrity monitoring for `at` configuration files and audit
+    scheduled tasks regularly to prevent persistence.
+  breed: file_access
+  mechanism: file_access
+  tactic: persistence
+  technique: event_triggered_execution
+  subtechnique: at
+  importance: critical
+  times:
+    - kind: times_per_proc
+      max: 2
+    - kind: times_per_exe
+      max: 4
+    - kind: times_per_full_ancestry
+      max: 4
+  arbitrary: []
+  file_actions: modify_related
+  file_actions_how: any
+  bases:
+    - dir: /etc
+      base: at.allow
+    - dir: /etc
+      base: at.deny

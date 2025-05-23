@@ -1,0 +1,55 @@
+# Detect AzureHound-related file creation or modification.
+- kind: detect_azurehound_file_modifications
+  name: detect_azurehound_file_modifications
+  version: 1.0
+  description: Detects creation or modification of AzureHound output files
+  documentation: |
+    # Quick Explanation
+    This detection identifies file system events where AzureHound output files, such as
+    *-azurecollection.zip or *-az*.json, are created or modified, signaling possible Azure
+    environment reconnaissance.
+
+    # Analysis of the Event
+    The detection targets files with names matching AzureHound patterns (e.g.,
+    *-azurecollection.zip, *-azprivroleadminrights.json), which are generated during
+    reconnaissance of Azure configurations. It uses `file_actions: modify_related` to
+    capture creation or modification events, with `bases` specifying the file patterns.
+    AzureHound is a tool used to extract sensitive Azure data, and its outputs suggest an
+    attacker is gathering information about cloud resources, roles, or permissions.
+
+    # Implications
+    In CI/CD, staging, or production environments, such file activity could indicate an
+    attacker mapping Azure resources for privilege escalation or data exfiltration. In
+    production, this threatens cloud infrastructure security, potentially exposing
+    sensitive data or configurations. In CI/CD, it could compromise pipelines interacting
+    with Azure resources, leading to broader attacks.
+
+    # Recommended Actions
+    Isolate systems where these files are detected to prevent further reconnaissance.
+    Investigate the process and user responsible for the file activity to identify the
+    attack vector. Review Azure audit logs for unauthorized access or configuration
+    changes. Block or monitor processes generating these files using endpoint security
+    tools. Strengthen Azure access controls, enforce least-privilege policies, and audit
+    service principal usage to mitigate reconnaissance risks.
+  breed: file_access
+  mechanism: file_access
+  tactic: discovery
+  technique: cloud_infrastructure_discovery
+  subtechnique: none
+  importance: critical
+  times:
+    - kind: times_per_proc
+      max: 2
+    - kind: times_per_exe
+      max: 4
+    - kind: times_per_full_ancestry
+      max: 4
+  arbitrary: []
+  file_actions: modify_related
+  file_actions_how: any
+  bases:
+    - regex: .*-azurecollection\.zip$
+    - regex: .*-azprivroleadminrights\.json$
+    - regex: .*-azglobaladminrights\.json$
+    - regex: .*-azcloudappadmins\.json$
+    - regex: .*-azapplicationadmins\.json$

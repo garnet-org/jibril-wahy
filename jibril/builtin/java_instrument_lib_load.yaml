@@ -1,0 +1,53 @@
+#
+# Java instrument library load.
+#
+
+# Java Instrumentation API allows developers to modify bytecode at runtime.
+# The libinstrument.so library is used for this purpose and can be abused
+# for malicious activities such as code injection, hooking, and evasion techniques.
+
+- kind: java_instrument_lib_load
+  name: java_instrument_lib_load
+  enabled: false
+  version: 1.0
+  description: Java instrument library load
+  documentation: |
+    https://garnet.gitbook.io/jibril/detections/file-access/java_instrument_lib_load
+  breed: file_access
+  mechanism: file_access
+  tactic: defense_evasion
+  technique: hijack_execution_flow
+  subtechnique: dynamic_linker_hijacking
+  importance: critical
+  times:
+    - kind: times_per_proc
+      max: 2
+    - kind: times_per_exe
+      max: 4
+    - kind: times_per_full_ancestry
+      max: 4
+  arbitrary:
+    - how: AND
+      which: pertinent
+      items:
+        - what: ancient_exe
+          which: irrelevant
+          pattern: .*(java|javaw|jre|jdk).*
+  file_actions: mmap
+  file_actions_how: any
+  bases:
+    # Primary instrumentation library.
+    - base: libinstrument.so
+
+    # Additional Java instrumentation-related libraries.
+    - base: libmanagement.so
+    - base: libmanagement_ext.so
+    - base: libjava_crw_demo.so
+
+    # Common locations for Java instrumentation libraries.
+    - dir: /usr/lib/jvm/java/lib
+    - dir: /usr/lib/jvm/java/jre/lib
+
+    # Regex to catch various JVM installations and architectures.
+    - regex: ^/usr/lib/jvm/.*/lib/(amd64|i386|arm|ppc64.*)/.*instrument\.so$
+    - regex: ^/opt/java/.*/lib/(amd64|i386|arm|ppc64.*)/.*instrument\.so$

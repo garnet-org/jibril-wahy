@@ -1,0 +1,52 @@
+#
+# PAM configuration modification.
+#
+
+# This detection identifies modifications to PAM (Pluggable Authentication Modules)
+# configuration files, which could indicate an attempt to compromise authentication
+# mechanisms. Attackers may modify these files to bypass authentication, establish
+# persistence, or create backdoors as part of defense evasion tactics.
+
+- kind: pam_config_modification
+  name: pam_config_modification
+  enabled: false
+  version: 1.0
+  description: PAM configuration modification
+  documentation: |
+    https://garnet.gitbook.io/jibril/detections/file-access/pam_config_modification
+  breed: file_access
+  mechanism: file_access
+  tactic: defense_evasion
+  technique: modify_authentication_process
+  subtechnique: pluggable_authentication_modules
+  importance: critical
+  times:
+    - kind: times_per_proc
+      max: 2
+    - kind: times_per_exe
+      max: 4
+    - kind: times_per_full_ancestry
+      max: 4
+  arbitrary: []
+  file_actions: modify_related
+  file_actions_how: any
+  bases:
+    # PAM module configuration files.
+    - dir: /etc
+      base: pam.conf
+    - dir: /lib/security
+    - dir: /lib64/security
+    - dir: /usr/lib/security
+    - dir: /usr/lib64/security
+
+    # PAM configuration directories with recursive matching.
+    - regex: /etc/security/.*$
+    - regex: /etc/pam\.d/.*$
+
+    # Distribution-specific PAM configurations.
+    - regex: /etc/authselect/.*$
+    - regex: /usr/share/pam-configs/.*$
+
+    # PAM modules and libraries.
+    - regex: ^/lib(64)?/security/pam_.*\.so$
+    - regex: ^/usr/lib(64)?/security/pam_.*\.so$

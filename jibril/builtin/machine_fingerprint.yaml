@@ -1,0 +1,90 @@
+#
+# Machine fingerprint.
+#
+
+# This detection identifies attempts to gather hardware and system information
+# by monitoring access to files that contain machine-specific identifiers and
+# hardware details. This activity is often performed during reconnaissance
+# phases to fingerprint the target system.
+
+- kind: machine_fingerprint
+  name: machine_fingerprint
+  enabled: false
+  version: 1.0
+  description: Machine fingerprint
+  documentation: |
+    https://garnet.gitbook.io/jibril/detections/file-access/machine_fingerprint
+  breed: file_access
+  mechanism: file_access
+  tactic: discovery
+  technique: system_information_discovery
+  subtechnique: none
+  importance: medium
+  times:
+    - kind: times_per_proc
+      max: 1
+    - kind: times_per_exe
+      max: 1
+    - kind: times_per_full_ancestry
+      max: 1
+  arbitrary:
+    - how: AND
+      which: pertinent
+      items:
+        - what: task_or_parent_exe
+          which: irrelevant
+          pattern: (/usr/.*bin.*|/usr/.*lib.*|/usr/local/.*bin.*|/usr/local/.*sbin.*).*(arch|b2sum|base32|base64|basename|basenc|cat|chcon|chgrp|chmod|chown|chroot|cksum|comm|cp|csplit|cut|date|dd|df|dir|dircolors|dirname|du|echo|env|expand|expr|factor|false|fmt|fold|groups|head|hostid|id|install|join|link|ln|logname|ls|md5sum|mkdir|mkfifo|mknod|mktemp|mv|nice|nl|nohup|nproc|numfmt|od|paste|pathchk|pinky|pr|printenv|printf|ptx|pwd|readlink|realpath|rm|rmdir|runcon|seq|sha1sum|sha224sum|sha256sum|sha384sum|sha512sum|shred|shuf|sleep|sort|split|stat|stdbuf|stty|sum|sync|tac|tail|tee|test|timeout|touch|tr|true|truncate|tsort|tty|uname|unexpand|uniq|unlink|uptime|users|vdir|wc|who|whoami|yes|find|locate|updatedb|xargs|ps|kill|pgrep|pkill|pstree|top|htop|free|sysctl|vmstat|pidof|fuser|lsof|iostat|mpstat|pmap|w|awk|diff|grep|sed|emacs|nano|less|more|jq|strings|strace|sudo|tar|tree|zcat|zgrep|zip|mount|hexdump).*
+  file_actions: access_related
+  file_actions_how: any
+  bases:
+    # Hardware information files.
+    - dir: /proc
+      base: ioports
+    - dir: /proc
+      base: iomem
+    - dir: /proc
+      base: interrupts
+    - dir: /proc
+      base: devices
+    - dir: /proc
+      base: scsi
+    - dir: /proc
+      base: pci
+
+    # System DMI information.
+    - regex: ^/sys/class/dmi/id/.*
+    - regex: ^/sys/firmware/dmi/tables/.*
+    - regex: ^/sys/firmware/efi/.*
+
+    # Hardware information.
+    - regex: ^/sys/devices/virtual/dmi/id/.*
+    - dir: /etc
+      base: machine-id
+    - dir: /var/lib/dbus
+      base: machine-id
+
+    # Hardware and device information.
+    - regex: ^/sys/devices/.*/modalias$
+    - regex: ^/sys/devices/.*/uevent$
+    - regex: ^/sys/class/block/.*/device/(vendor|model|serial)$
+    - regex: ^/sys/block/.*/device/(vendor|model|serial)$
+
+    # USB devices information.
+    - regex: ^/sys/bus/usb/devices/.*/(idVendor|idProduct|manufacturer|product|serial)$
+
+    # PCI devices information.
+    - regex: ^/sys/bus/pci/devices/.*/.*$
+
+    # BIOS and firmware information.
+    - regex: ^/sys/firmware/acpi/.*
+    - regex: ^/sys/class/hwmon/hwmon[0-9]+/.*
+
+    # GPU information.
+    - regex: ^/sys/class/drm/card[0-9]+/device/.*
+    - regex: ^/sys/class/graphics/fb[0-9]+/.*
+
+    # Additional machine-specific files not covered in other fingerprints
+    # These are unique to machine_fingerprint
+    - regex: ^/sys/devices/platform/.*
+    - regex: ^/sys/class/input/.*
+    - regex: ^/sys/class/sound/.*

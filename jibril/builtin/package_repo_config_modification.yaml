@@ -1,0 +1,55 @@
+#
+# Package repository file modification.
+#
+
+# This detection identifies modifications to package repository configuration files,
+# which could indicate an attempt to redirect package installations to malicious sources
+# or prevent security updates. Attackers may modify these files to compromise the
+# system's package management infrastructure as part of defense evasion tactics.
+
+- kind: package_repo_config_modification
+  name: package_repo_modification
+  enabled: false
+  version: 1.0
+  description: Package repository file modification
+  documentation: |
+    https://garnet.gitbook.io/jibril/detections/file-access/package_repo_config_modification
+  breed: file_access
+  mechanism: file_access
+  tactic: defense_evasion
+  technique: impair_defenses
+  subtechnique: disable_or_modify_tools
+  importance: medium
+  times:
+    - kind: times_per_proc
+      max: 2
+    - kind: times_per_exe
+      max: 4
+    - kind: times_per_full_ancestry
+      max: 4
+  arbitrary: []
+  file_actions: access_related
+  file_actions_how: any
+  bases:
+    # Alpine Linux package manager.
+    - regex: /etc/apk(/repositories)?$
+
+    # Debian/Ubuntu package managers.
+    - regex: /etc/apt/sources\.list(\.d/.*)?$
+    - regex: /etc/apt/trusted\.gpg(\.d/.*)?$
+    - regex: /etc/apt/preferences(\.d/.*)?$
+
+    # Arch Linux package manager.
+    - regex: /etc/pacman\.d(/.*)?$
+    - regex: /etc/pacman\.conf$
+
+    # Red Hat family package managers.
+    - regex: /etc/yum\.repos\.d(/.*)?$
+    - regex: /etc/yum\.conf$
+    - regex: /etc/dnf/dnf\.conf$
+    - regex: /etc/dnf/modules\.d/.*\.module$
+
+    # SUSE family package managers.
+    - regex: /etc/zypp/repos\.d(/.*)?$
+    - regex: /etc/zypp/services\.d(/.*)?$
+    - regex: /etc/zypp/zypp\.conf$

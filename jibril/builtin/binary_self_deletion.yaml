@@ -1,0 +1,29 @@
+#
+# Binary executed self-deleted.
+#
+
+- kind: binary_self_deletion
+  name: binary_self_deletion
+  enabled: false
+  version: 1.0
+  description: Binary execution and self-deletion
+  documentation: |
+    https://garnet.gitbook.io/jibril/detections/file-access/binary_self_deletion
+  breed: file_access
+  mechanism: file_access
+  tactic: defense_evasion
+  technique: indicator_removal
+  subtechnique: file_deletion
+  importance: critical
+  times:
+    - kind: times_per_proc
+      max: 4
+    - kind: times_per_exe
+      max: 4
+    - kind: times_per_full_ancestry
+      max: 4
+  arbitrary: []
+  file_actions: open|mmap|unlink|execve
+  file_actions_how: all
+  bases:
+    - regex: .*

@@ -1,0 +1,29 @@
+#
+# Code modification through procfs.
+#
+
+- kind: code_modification_through_procfs
+  name: code_modification_through_procfs
+  enabled: false
+  version: 1.0
+  description: Code modification through procfs
+  documentation: |
+    https://garnet.gitbook.io/jibril/detections/file-access/code_modification_through_procfs
+  breed: file_access
+  mechanism: file_access
+  tactic: defense_evasion
+  technique: process_injection
+  subtechnique: proc_memory
+  importance: critical
+  times:
+    - kind: times_per_proc
+      max: 2
+    - kind: times_per_exe
+      max: 4
+    - kind: times_per_full_ancestry
+      max: 4
+  arbitrary: []
+  file_actions: access_related
+  file_actions_how: any
+  bases:
+    - regex: /proc/[0-9]+/mem$

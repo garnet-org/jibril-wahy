@@ -1,0 +1,64 @@
+# Detect apt and apt-get executions with sudo parent and privilege escalation parameters.
+- kind: apt_privilege_escalation
+  name: apt_privilege_escalation
+  version: 1.0
+  description: Detects apt privilege escalation attempt using arguments
+  documentation: |
+    # Quick Explanation
+    This detection identifies `apt` and `apt-get` commands executions with a `sudo` parent
+    process and `APT::Update::Pre-Invoke::` parameters, suggesting attempts to exploit
+    sudo for privilege escalation on Linux systems.
+
+    # Analysis of the Event
+    The detection targets `apt` and `apt-get` processes executed under `sudo` with
+    command-line arguments including `APT::Update::Pre-Invoke::`, which can be used to run
+    arbitrary commands during package updates, potentially granting root access. Since
+    Jibril captures only the `apt` and `apt-get` command line and not shell pipes, the
+    detection uses `file_actions: execve` to capture `apt` and `apt-get` executions and an
+    `arbitrary` rule to filter for `APT::Update::Pre-Invoke::` and verify a `sudo` parent
+    process via `parent_exe`. This approach approximates the Splunk logic by leveraging
+    process ancestry to detect privilege escalation attempts.
+
+    # Implications
+    In CI/CD, staging, or production environments, such executions could allow attackers
+    to gain root privileges, enabling full system control, data theft, or persistent
+    threats. In CI/CD, this might compromise build pipelines or deploy malicious packages.
+    In production, it could disrupt services, expose sensitive data, or facilitate lateral
+    movement, severely impacting system security and operational integrity.
+
+    # Recommended Actions
+    Immediately isolate systems showing this execution pattern to prevent privilege
+    escalation. Investigate the `apt` and `apt-get` command, its parent `sudo` process,
+    and user context to identify the attack vector. Review `/etc/apt/apt.conf.d/` for
+    unauthorized `Pre-Invoke` configurations and remove them. Enhance endpoint monitoring
+    to detect suspicious `apt` or `sudo` usage. Restrict `sudo` privileges for `apt` to
+    trusted users and implement least-privilege policies. Audit package management logs
+    for unauthorized changes.
+  breed: file_access
+  mechanism: execution
+  tactic: privilege_escalation
+  technique: abuse_elevation_control_mechanism
+  subtechnique: none
+  importance: critical
+  times:
+    - kind: times_per_proc
+      max: 2
+    - kind: times_per_exe
+      max: 4
+    - kind: times_per_full_ancestry
+      max: 4
+  arbitrary:
+    - how: AND
+      which: irrelevant
+      items:
+        - what: args
+          which: pertinent
+          pattern: .*APT::Update::Pre-Invoke::.*
+        - what: parent_exe
+          which: pertinent
+          pattern: sudo
+  file_actions: execve
+  file_actions_how: any
+  bases:
+    - base: apt-get
+    - base: apt

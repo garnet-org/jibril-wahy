@@ -1,0 +1,30 @@
+#
+# Core pattern config file access.
+#
+
+- kind: core_pattern_access
+  name: core_pattern_access
+  enabled: false
+  version: 1.0
+  description: Core pattern config file access
+  documentation: |
+    https://garnet.gitbook.io/jibril/detections/file-access/core_pattern_access
+  breed: file_access
+  mechanism: file_access
+  tactic: defense_evasion
+  technique: impair_defenses
+  subtechnique: disable_or_modify_tools
+  importance: critical
+  times:
+    - kind: times_per_proc
+      max: 2
+    - kind: times_per_exe
+      max: 4
+    - kind: times_per_full_ancestry
+      max: 4
+  arbitrary: []
+  file_actions: access_related
+  file_actions_how: any
+  bases:
+    - dir: /proc/sys/kernel
+      base: core_pattern

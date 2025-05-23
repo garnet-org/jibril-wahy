@@ -1,0 +1,32 @@
+#
+# SysRQ file access.
+#
+
+- kind: sysrq_access
+  name: sysrq_access
+  enabled: false
+  version: 1.0
+  description: Kernel system request file access
+  documentation: |
+    https://garnet.gitbook.io/jibril/detections/file-access/sysrq_access
+  breed: file_access
+  mechanism: file_access
+  tactic: impact
+  technique: system_shutdown_reboot
+  subtechnique: none
+  importance: critical
+  times:
+    - kind: times_per_proc
+      max: 2
+    - kind: times_per_exe
+      max: 4
+    - kind: times_per_full_ancestry
+      max: 4
+  arbitrary: []
+  file_actions: access_related
+  file_actions_how: any
+  bases:
+    - dir: /proc/sys/kernel
+      base: sysrq
+    - dir: /proc
+      base: sysrq-trigger

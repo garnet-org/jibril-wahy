@@ -1,0 +1,73 @@
+#
+# Global shared library injection (critical).
+#
+
+- kind: global_shlib_modification
+  name: global_shlib_modification_critical
+  enabled: false
+  version: 1.0
+  description: Global shared library injection
+  documentation: |
+    https://garnet.gitbook.io/jibril/detections/file-access/global_shlib_modification
+  breed: file_access
+  mechanism: file_access
+  tactic: persistence
+  technique: hijack_execution_flow
+  subtechnique: dynamic_linker_hijacking
+  importance: critical
+  times:
+    - kind: times_per_proc
+      max: 2
+    - kind: times_per_exe
+      max: 4
+    - kind: times_per_full_ancestry
+      max: 4
+  arbitrary:
+    - how: AND
+      which: pertinent
+      items:
+        - what: ancient_exe
+          which: irrelevant
+          pattern: (/usr/.*bin.*|/usr/.*lib.*|/usr/local/.*bin.*|/usr/local/.*sbin.*).*(apk|apt|apt-add-repository|apt-cache|apt-config|apt-file|debconf|debconf-get-selections|debconf-set-selections|debconf-show|dnf|dpkg|dpkg-deb|dpkg-query|emerge|equo|flatpak|guix|luet|needrestart|nix|pacman|pisi|portage|rpm|rpm2cpio|rpmdb|rpmquery|slackpkg|snap|spm|xbps|yum|zypper)
+  file_actions: modify_related
+  file_actions_how: any
+  bases:
+    # Core dynamic linker configuration files.
+    - base: ld.so.preload
+    - base: ld.so.conf
+    # Dynamic linker configuration directories.
+    - dir: /etc/ld.so.conf.d
+    - dir: /usr/lib/ld.so.conf.d
+    # System-wide library configuration.
+    - regex: /etc/ld\.so\.conf\.d/.*\.conf$
+
+# TODO: create another detection for shlib modification.
+- kind: global_shlib_modification
+  name: global_shlib_modification_high
+  enabled: false
+  version: 1.0
+  description: Global shared library injection
+  documentation: |
+    https://garnet.gitbook.io/jibril/detections/file-access/global_shlib_modification
+  breed: file_access
+  mechanism: file_access
+  tactic: persistence
+  technique: hijack_execution_flow
+  subtechnique: dynamic_linker_hijacking
+  importance: high
+  times:
+    - kind: times_per_proc
+      max: 2
+    - kind: times_per_exe
+      max: 4
+    - kind: times_per_full_ancestry
+      max: 4
+  arbitrary:
+    - how: AND
+      which: pertinent
+      items: []
+  file_actions: modify_related
+  file_actions_how: any
+  bases:
+    - regex: /lib(64)?/(libc|libssl|libcrypto|libsystemd|libnss).*\.so(\.\d+)*$
+    - regex: /usr/lib(64)?/(libc|libssl|libcrypto|libsystemd|libnss).*\.so(\.\d+)*$

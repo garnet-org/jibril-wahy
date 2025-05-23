@@ -1,0 +1,57 @@
+# Detect nslookup executions with parameters indicative of DNS exfiltration.
+- kind: dns_exfiltration_using_nslookup
+  name: dns_exfiltration_using_nslookup
+  version: 1.0
+  description: Detects nslookup executions with arguments that may indicate exfiltration attempts.
+  documentation: |
+    # Quick Explanation
+    This detection identifies executions of `nslookup` with command-line arguments like
+    `-querytype=`, `-qt=`, `-q=`, `-type=`, or `-retry=`, which are often used to
+    exfiltrate data via DNS queries.
+
+    # Analysis of the Event
+    The detection targets `nslookup` processes with arguments associated with DNS query
+    manipulation or retries, such as `-querytype=`, `-qt=`, `-q=`, `-type=`, or `-retry=`.
+    These patterns suggest potential misuse for encoding and transmitting data to
+    attacker-controlled DNS servers. The `file_actions: execve` captures these executions,
+    and an `arbitrary` rule filters for the specific command-line patterns, enabling
+    detection of covert data exfiltration attempts.
+
+    # Implications
+    In CI/CD, staging, or production environments, such executions could indicate
+    attackers exfiltrating sensitive data (e.g., credentials, configurations) via DNS,
+    bypassing traditional network monitoring. In CI/CD, this could expose pipeline secrets
+    or artifacts. In production, it risks data breaches, intellectual property theft, or
+    further compromise, as DNS traffic is often less scrutinized.
+
+    # Recommended Actions
+    Isolate systems showing these execution patterns to prevent data exfiltration. Analyze
+    network DNS logs to identify queried domains and block suspicious ones at the
+    firewall. Investigate the process’s origin, user, and parent process to trace the
+    attack vector. Deploy endpoint detection tools to monitor for similar nslookup misuse.
+    Implement DNS query logging and anomaly detection to catch covert channels, and
+    restrict nslookup execution to authorized users or processes.
+  breed: file_access
+  mechanism: execution
+  tactic: exfiltration
+  technique: exfiltration_over_other_network_medium
+  subtechnique: none
+  importance: critical
+  times:
+    - kind: times_per_proc
+      max: 2
+    - kind: times_per_exe
+      max: 4
+    - kind: times_per_full_ancestry
+      max: 4
+  arbitrary:
+    - how: OR
+      which: irrelevant
+      items:
+        - what: args
+          which: pertinent
+          pattern: .*(-querytype=|-qt=|-q=|-type=|-retry=).*
+  file_actions: execve
+  file_actions_how: any
+  bases:
+    - base: nslookup

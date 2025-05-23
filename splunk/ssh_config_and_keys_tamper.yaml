@@ -1,0 +1,55 @@
+# Detect deletion of SSH configuration files or keys.
+- kind: ssh_config_and_keys_tamper
+  name: ssh_config_and_keys_tamper
+  version: 1.0
+  description: Detects tampering of SSH configuration files or keys
+  documentation: |
+    # Quick Explanation
+    This detection identifies file deletion events targeting SSH configuration files or
+    keys in `/etc/ssh/` or `~/.ssh/`, suggesting attempts to evade detection or disrupt
+    secure access.
+
+    # Analysis of the Event
+    The detection monitors filesystem events where files in `/etc/ssh/*` (system-wide SSH
+    configurations) or `~/.ssh/*` (user-specific SSH keys and configs) are deleted. The
+    `file_actions: tamper_related` captures deletion events, with `bases` specifying the
+    critical SSH file paths. Such deletions could indicate an attacker removing SSH keys
+    to disrupt authentication or deleting configs to cover tracks, often associated with
+    post-compromise evasion or destructive attacks.
+
+    # Implications
+    In CI/CD, staging, or production environments, deleting SSH files could disable secure
+    access, disrupt automated workflows, or facilitate unauthorized access by altering
+    authentication mechanisms. In CI/CD, this might break pipeline authentication,
+    delaying deployments. In production, it could lock out legitimate users, enable
+    persistence via compromised keys, or expose systems to further attacks, compromising
+    system integrity and availability.
+
+    # Recommended Actions
+    Immediately isolate systems where SSH files are deleted to prevent further compromise.
+    Investigate the process, user, and file metadata to identify the attack vector.
+    Restore deleted SSH files from backups and verify their integrity. Audit SSH
+    configurations and keys for unauthorized changes. Enhance endpoint monitoring to
+    detect similar file tampering and restrict access to SSH directories to trusted
+    processes and users. Implement file integrity monitoring to alert on unauthorized
+    deletions.
+  breed: file_access
+  mechanism: file_access
+  tactic: defense_evasion
+  technique: indicator_removal
+  subtechnique: file_deletion
+  importance: critical
+  times:
+    - kind: times_per_proc
+      max: 2
+    - kind: times_per_exe
+      max: 4
+    - kind: times_per_full_ancestry
+      max: 4
+  arbitrary: []
+  file_actions: tamper_related
+  file_actions_how: any
+  bases:
+    - regex: /etc/ssh/.*
+    - regex: /home/[^/]+/\.ssh/.*
+    - regex: /root/\.ssh/.*

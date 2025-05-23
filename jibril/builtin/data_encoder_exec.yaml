@@ -1,0 +1,31 @@
+#
+# Data encoder execution.
+#
+
+- kind: data_encoder_exec
+  name: data_encoder_exec
+  enabled: false
+  version: 1.0
+  description: Data encoder execution
+  documentation: |
+    https://garnet.gitbook.io/jibril/detections/execution/data_encoder_exec
+  breed: file_access
+  mechanism: execution
+  tactic: command_and_control
+  technique: data_encoding
+  subtechnique: none
+  importance: high
+  times:
+    - kind: times_per_parent_proc
+      max: 2
+    - kind: times_per_parent_exe
+      max: 4
+    - kind: times_per_full_ancestry
+      max: 4
+  arbitrary: []
+  file_actions: execve
+  file_actions_how: any
+  bases:
+    - base: ascii85
+    - regex: ^.*/base(16|32(hex|plain)?|58|64(mime|pem|plain|url)?|z)$
+    - regex: ^.*/u(rlencode|udecode|uencode)$

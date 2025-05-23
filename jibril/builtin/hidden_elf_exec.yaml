@@ -1,0 +1,27 @@
+#
+# Hidden ELF file execution.
+#
+
+- kind: hidden_elf_exec
+  name: hidden_elf_exec
+  enabled: false
+  version: 1.0
+  description: Hidden ELF execution
+  documentation: |
+    https://garnet.gitbook.io/jibril/detections/execution/hidden_elf_exec
+  breed: file_access
+  mechanism: execution
+  tactic: defense_evasion
+  technique: masquerading
+  subtechnique: hidden_files_and_directories
+  importance: critical
+  times:
+    - kind: times_per_parent_exe
+      max: 4
+    - kind: times_per_full_ancestry
+      max: 4
+  arbitrary: []
+  file_actions: execve
+  file_actions_how: any
+  bases:
+    - regex: ^/.*/\..*

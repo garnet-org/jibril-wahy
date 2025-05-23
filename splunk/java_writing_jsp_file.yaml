@@ -1,0 +1,79 @@
+# Detect Java processes creating or modifying JSP files.
+- kind: java_writing_jsp_file
+  name: java_writing_jsp_file
+  version: 1.0
+  description: Detects Java processes that create or modify JSP files
+  documentation: |
+    # Quick Explanation
+    This detection identifies when Java processes (`java`, `javaw`, or other JVM
+    executables) create or modify JSP files (`*.jsp`) on Linux systems, a common indicator
+    of attackers deploying web shells for persistent remote access.
+
+    # Analysis of the Event
+    The detection monitors file system events where JSP files are created or modified by
+    Java processes, which are identified by process names like `java`, `javaw`, or other
+    JVM executables such as those in application servers (Tomcat, JBoss, etc.). The
+    `file_actions: modify_related` captures creation or modification events, with `bases`
+    specifying the `*.jsp` file pattern and an `arbitrary` rule filtering for Java-related
+    process names. JSP files are often used in web applications, and their creation by
+    Java processes outside legitimate contexts suggests malicious activity, such as web
+    shell deployment to enable remote command execution.
+
+    # Implications
+    In CI/CD, staging, or production Linux environments, such activity could indicate an
+    attacker establishing persistent access via a web shell, leading to unauthorized
+    control, data exfiltration, or further compromise. In CI/CD, this might expose
+    sensitive build artifacts or credentials. In production, it could enable attackers to
+    manipulate web applications, disrupt services, or escalate privileges, severely
+    impacting system security and availability.
+
+    # Recommended Actions
+    Immediately isolate Linux systems where JSP files are created or modified by Java
+    processes to prevent further compromise. Investigate the Java process's origin, user,
+    and parent process to identify the attack vector. Analyze the JSP file content for
+    malicious code and remove unauthorized files. Enhance endpoint monitoring to detect
+    similar file activities and restrict Java process execution to trusted applications.
+    Implement web application firewalls to block malicious web shell interactions and
+    audit web server directories for unauthorized JSP files.
+  breed: file_access
+  mechanism: file_access
+  tactic: persistence
+  technique: web_shell
+  subtechnique: none
+  importance: critical
+  times:
+    - kind: times_per_proc
+      max: 2
+    - kind: times_per_exe
+      max: 4
+    - kind: times_per_full_ancestry
+      max: 4
+  arbitrary:
+    - how: OR
+      which: irrelevant
+      items:
+        - what: exe
+          which: pertinent
+          pattern: java$
+        - what: exe
+          which: pertinent
+          pattern: javaw$
+        - what: exe
+          which: pertinent
+          pattern: tomcat$
+        - what: exe
+          which: pertinent
+          pattern: catalina$
+        - what: exe
+          which: pertinent
+          pattern: jboss$
+        - what: exe
+          which: pertinent
+          pattern: wildfly$
+        - what: exe
+          which: pertinent
+          pattern: jetty$
+  file_actions: modify_related
+  file_actions_how: any
+  bases:
+    - regex: .*\.jsp.*$

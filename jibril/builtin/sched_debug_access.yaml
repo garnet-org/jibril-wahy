@@ -1,0 +1,30 @@
+#
+# Scheduler debug file access.
+#
+
+- kind: sched_debug_access
+  name: sched_debug_access
+  enabled: false
+  version: 1.0
+  description: Scheduler debug file access
+  documentation: |
+    https://garnet.gitbook.io/jibril/detections/file-access/sched_debug_access
+  breed: file_access
+  mechanism: file_access
+  tactic: discovery
+  technique: system_information_discovery
+  subtechnique: none
+  importance: high
+  times:
+    - kind: times_per_proc
+      max: 2
+    - kind: times_per_exe
+      max: 4
+    - kind: times_per_full_ancestry
+      max: 4
+  arbitrary: []
+  file_actions: access_related
+  file_actions_how: any
+  bases:
+    - dir: /proc
+      base: sched_debug

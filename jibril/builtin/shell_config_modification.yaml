@@ -1,0 +1,95 @@
+#
+# Shell configuration file modification.
+#
+
+# This detection identifies modifications to shell configuration files, which could
+# indicate an attempt to establish persistence. Attackers may modify these files to
+# execute malicious commands when users log in or open shells, allowing for persistent
+# access to the system.
+
+- kind: shell_config_modification
+  name: shell_config_modification_etc
+  enabled: false
+  version: 1.0
+  description: Shell configuration file modification
+  documentation: |
+    https://garnet.gitbook.io/jibril/detections/file-access/shell_config_modification
+  breed: file_access
+  mechanism: file_access
+  tactic: persistence
+  technique: event_triggered_execution
+  subtechnique: unix_shell_configuration_modification
+  importance: high
+  times:
+    - kind: times_per_proc
+      max: 2
+    - kind: times_per_exe
+      max: 4
+    - kind: times_per_full_ancestry
+      max: 4
+  arbitrary: []
+  file_actions: modify_related
+  file_actions_how: any
+  bases:
+    # System-wide shell configuration files.
+    - dir: /etc/profile.d
+    - dir: /etc/bash_completion.d
+    - dir: /etc/skel
+
+    # Common shell configuration files.
+    - dir: /etc
+      base: profile
+    - dir: /etc
+      base: bashrc
+    - dir: /etc
+      base: zshrc
+    - dir: /etc
+      base: zprofile
+    - dir: /etc
+      base: zshenv
+    - dir: /etc
+      base: zlogin
+    - dir: /etc
+      base: zlogout
+
+# Shell configuration file modification (home).
+
+- kind: shell_config_modification
+  name: shell_config_modification_home
+  enabled: false
+  version: 1.0
+  description: Shell configuration file modification
+  documentation: |
+    https://garnet.gitbook.io/jibril/detections/file-access/shell_config_modification
+  breed: file_access
+  mechanism: file_access
+  tactic: persistence
+  technique: event_triggered_execution
+  subtechnique: unix_shell_configuration_modification
+  importance: high
+  times:
+    - kind: times_per_proc
+      max: 2
+    - kind: times_per_exe
+      max: 4
+    - kind: times_per_full_ancestry
+      max: 4
+  arbitrary: []
+  file_actions: modify_related
+  file_actions_how: any
+  bases:
+    # User-level shell config files for common shells.
+    - regex: ^/(home/[^/]+|root)/\.(bashrc|bash_profile|bash_login|bash_logout|profile|zshrc|zprofile|zshenv|zlogin|zlogout|kshrc|cshrc|tcshrc|login|logout)$
+
+    # Shell aliases and functions - common for command hijacking.
+    - regex: ^/(home/[^/]+|root)/\.(bash_aliases|zsh_aliases|aliases|bash_functions|zsh_functions)$
+
+    # Terminal multiplexer configuration files.
+    - regex: ^/(home/[^/]+|root)/\.(tmux\.conf|screenrc)$
+    - dir: /etc
+      base: tmux.conf
+    - dir: /etc
+      base: screenrc
+
+    # Vim/Neovim configuration files.
+    - regex: ^/(home/[^/]+|root)/\.(vimrc|vim/.*rc|config/nvim/.*\.vim)$

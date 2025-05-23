@@ -1,0 +1,72 @@
+#
+# Filesystem fingerprint.
+#
+
+- kind: filesystem_fingerprint
+  name: filesystem_fingerprint
+  enabled: false
+  version: 1.0
+  description: Filesystem fingerprint
+  documentation: |
+    https://garnet.gitbook.io/jibril/detections/file-access/filesystem_fingerprint
+  breed: file_access
+  mechanism: file_access
+  tactic: discovery
+  technique: system_information_discovery
+  subtechnique: none
+  importance: low
+  times:
+    - kind: times_per_proc
+      max: 1
+    - kind: times_per_exe
+      max: 1
+    - kind: times_per_full_ancestry
+      max: 1
+  arbitrary:
+    - how: AND
+      which: pertinent
+      items:
+        - what: task_or_parent_exe
+          which: irrelevant
+          pattern: (/usr/.*bin.*|/usr/.*lib.*|/usr/local/.*bin.*|/usr/local/.*sbin.*).*(arch|b2sum|base32|base64|basename|basenc|cat|chcon|chgrp|chmod|chown|chroot|cksum|comm|cp|csplit|cut|date|dd|df|dir|dircolors|dirname|du|echo|env|expand|expr|factor|false|fmt|fold|groups|head|hostid|id|install|join|link|ln|logname|ls|md5sum|mkdir|mkfifo|mknod|mktemp|mv|nice|nl|nohup|nproc|numfmt|od|paste|pathchk|pinky|pr|printenv|printf|ptx|pwd|readlink|realpath|rm|rmdir|runcon|seq|sha1sum|sha224sum|sha256sum|sha384sum|sha512sum|shred|shuf|sleep|sort|split|stat|stdbuf|stty|sum|sync|tac|tail|tee|test|timeout|touch|tr|true|truncate|tsort|tty|uname|unexpand|uniq|unlink|uptime|users|vdir|wc|who|whoami|yes|find|locate|updatedb|xargs|ps|kill|pgrep|pkill|pstree|top|htop|free|sysctl|vmstat|pidof|fuser|lsof|iostat|mpstat|pmap|w|awk|diff|grep|sed|emacs|nano|less|more|jq|strings|strace|sudo|tar|tree|zcat|zgrep|zip|mount|hexdump).*
+  file_actions: access_related
+  file_actions_how: any
+  bases:
+    # System filesystem configuration.
+    - dir: /etc
+      base: fstab
+    - dir: /etc
+      base: mtab
+
+    # Proc filesystem information.
+    - regex: /proc/(diskstats|filesystems|mdstat|mounts|mountinfo|partitions|swaps)$
+
+    # Proc per-process filesystem information.
+    - regex: /proc/[0-9]+/(mounts|mountinfo)$
+
+    # System storage information.
+    # Note: /sys/block entries may overlap with machine_fingerprint's
+    # "/sys/class/block/.*/device/(vendor|model|serial)$" and
+    # "/sys/block/.*/device/(vendor|model|serial)$".
+    - dir: /sys/block
+      base: dm-0
+    - dir: /sys/block
+      base: sda
+    - dir: /sys/block
+      base: vda
+    - dir: /sys/block
+      base: xvda
+    - dir: /sys/block
+      base: nvme0n1
+
+    # LVM information.
+    - dir: /etc/lvm
+      base: lvm.conf
+    - regex: /dev/mapper/.*$
+
+    # Storage device information.
+    - regex: /dev/(sd[a-z][0-9]*|nvme[0-9]+n[0-9]+p?[0-9]*)$
+
+    # Systemd mount units.
+    - regex: /etc/systemd/system/.*\.mount$
+    - regex: /usr/lib/systemd/system/.*\.mount$

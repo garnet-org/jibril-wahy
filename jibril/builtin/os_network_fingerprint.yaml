@@ -1,0 +1,89 @@
+#
+# OS network fingerprint.
+#
+
+# This detection identifies attempts to gather network configuration information
+# by monitoring access to files that contain network settings, interface details,
+# and routing information. This activity is often performed during reconnaissance
+# phases to map the network environment of the target system.
+
+- kind: os_network_fingerprint
+  name: os_network_fingerprint
+  enabled: false
+  version: 1.0
+  description: OS network fingerprint
+  documentation: |
+    https://garnet.gitbook.io/jibril/detections/file-access/os_network_fingerprint
+  breed: file_access
+  mechanism: file_access
+  tactic: discovery
+  technique: system_network_configuration_discovery
+  subtechnique: none
+  importance: low
+  times:
+    - kind: times_per_proc
+      max: 1
+    - kind: times_per_exe
+      max: 1
+    - kind: times_per_full_ancestry
+      max: 1
+  arbitrary:
+    - how: AND
+      which: pertinent
+      items:
+        - what: task_or_parent_exe
+          which: irrelevant
+          pattern: (/usr/.*bin.*|/usr/.*lib.*|/usr/local/.*bin.*|/usr/local/.*sbin.*).*(arch|b2sum|base32|base64|basename|basenc|cat|chcon|chgrp|chmod|chown|chroot|cksum|comm|cp|csplit|cut|date|dd|df|dir|dircolors|dirname|du|echo|env|expand|expr|factor|false|fmt|fold|groups|head|hostid|id|install|join|link|ln|logname|ls|md5sum|mkdir|mkfifo|mknod|mktemp|mv|nice|nl|nohup|nproc|numfmt|od|paste|pathchk|pinky|pr|printenv|printf|ptx|pwd|readlink|realpath|rm|rmdir|runcon|seq|sha1sum|sha224sum|sha256sum|sha384sum|sha512sum|shred|shuf|sleep|sort|split|stat|stdbuf|stty|sum|sync|tac|tail|tee|test|timeout|touch|tr|true|truncate|tsort|tty|uname|unexpand|uniq|unlink|uptime|users|vdir|wc|who|whoami|yes|find|locate|updatedb|xargs|ps|kill|pgrep|pkill|pstree|top|htop|free|sysctl|vmstat|pidof|fuser|lsof|iostat|mpstat|pmap|w|awk|diff|grep|sed|emacs|nano|less|more|jq|strings|strace|sudo|tar|tree|zcat|zgrep|zip|mount|hexdump).*
+  file_actions: access_related
+  file_actions_how: any
+  bases:
+    # Network configuration directories in procfs.
+    - regex: /proc/sys/net/(core|bridge|netfilter|unix|ipv4|ipv6)(/.*)?$
+
+    # Network interface information.
+    - regex: /proc/net/(dev|if_inet6|route|arp|tcp|udp|unix|netstat|protocols)$
+
+    # Network configuration files.
+    - dir: /etc/network
+      base: interfaces
+    - dir: /etc/netplan
+      regex: .*\.ya?ml$
+    - dir: /etc
+      base: hosts
+    - dir: /etc
+      base: hostname
+    - dir: /etc
+      base: nsswitch.conf
+    - dir: /etc
+      base: protocols
+    - dir: /etc
+      base: services
+    - dir: /etc
+      base: networks
+
+    # Network service configuration.
+    - regex: /etc/systemd/network/.*\.network$
+
+    # Firewall configuration.
+    - dir: /etc
+      base: iptables.rules
+    - dir: /etc
+      base: nftables.conf
+
+    # DNS configuration.
+    - dir: /etc
+      base: resolv.conf
+    - dir: /etc/systemd
+      base: resolved.conf
+    - dir: /run/systemd/resolve
+      base: resolv.conf
+
+    # Network manager configuration.
+    - regex: /etc/NetworkManager/.*\.conf$
+    - regex: /etc/NetworkManager/system-connections/.*$
+
+    # Network device information.
+    # Note: May overlap with machine_fingerprint which monitors /sys/class
+    # entries and with filesystem_fingerprint which monitors some /sys/block
+    # entries.
+    - regex: /sys/class/net/[^/]+/(address|type|operstate|mtu|device/uevent)$

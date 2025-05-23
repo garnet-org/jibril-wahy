@@ -1,0 +1,54 @@
+#
+# Java debug library load.
+#
+
+# Java Debug Wire Protocol (JDWP) is a protocol used for communication between a debugger
+# and the Java Virtual Machine (JVM). The libjdwp.so library is used to load the JDWP
+# agent into the JVM. This detection is looking for the loading of the libjdwp.so
+# library and other Java debugging libraries that could be used for malicious purposes.
+
+- kind: java_debug_lib_load
+  name: java_debug_lib_load
+  enabled: false
+  version: 1.0
+  description: Java debug library load
+  documentation: |
+    https://garnet.gitbook.io/jibril/detections/file-access/java_debug_lib_load
+  breed: file_access
+  mechanism: file_access
+  tactic: defense_evasion
+  technique: hijack_execution_flow
+  subtechnique: dynamic_linker_hijacking
+  importance: critical
+  times:
+    - kind: times_per_proc
+      max: 2
+    - kind: times_per_exe
+      max: 4
+    - kind: times_per_full_ancestry
+      max: 4
+  arbitrary:
+    - how: AND
+      which: pertinent
+      items:
+        - what: ancient_exe
+          which: irrelevant
+          pattern: .*(java|javaw|jre|jdk).*
+  file_actions: mmap
+  file_actions_how: any
+  bases:
+    # Primary JDWP library.
+    - base: libjdwp.so
+
+    # Additional Java debugging libraries.
+    - base: libdt_socket.so
+    - base: libdt_shmem.so
+    - base: libattach.so
+
+    # Common locations for Java debug libraries.
+    - dir: /usr/lib/jvm/java/lib
+    - dir: /usr/lib/jvm/java/jre/lib
+
+    # Regex to catch various JVM installations and architectures.
+    - regex: ^/usr/lib/jvm/.*/lib/(amd64|i386|arm|ppc64.*)/.*jdwp\.so$
+    - regex: ^/opt/java/.*/lib/(amd64|i386|arm|ppc64.*)/.*jdwp\.so$

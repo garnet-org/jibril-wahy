@@ -1,0 +1,59 @@
+# Detect crontab executions with the -l parameter.
+- kind: crontab_list_parameter
+  name: crontab_list_parameter
+  version: 1.0
+  description: Detects crontab command executions with the -l parameter
+  documentation: |
+    # Quick Explanation
+    This detection identifies executions of the `crontab` command with the `-l` (list)
+    parameter, which may signal an attacker’s attempt to inspect or manipulate cron jobs
+    for persistent malicious code execution.
+
+    # Analysis of the Event
+    The detection targets `crontab` processes executed with the `-l` flag, which lists a
+    user’s cron jobs and can be a precursor to modifying them for malicious purposes. The
+    `file_actions: execve` captures these executions, and an `arbitrary` rule filters for
+    the command-line pattern `*-l*`. Cron jobs are a common persistence mechanism,
+    allowing attackers to schedule recurring malicious tasks, making this a high-risk
+    indicator of compromise.
+
+    # Implications
+    In CI/CD, staging, or production environments, such executions could enable persistent
+    execution of malicious scripts, leading to data exfiltration, system compromise, or
+    service disruption. In CI/CD, this might introduce backdoors into build pipelines. In
+    production, it could allow attackers to maintain long-term access, execute destructive
+    tasks, or escalate privileges, severely impacting system security and operational
+    continuity.
+
+    # Recommended Actions
+    Immediately investigate systems showing this crontab execution pattern to identify
+    malicious cron jobs. Review cron configurations (`/etc/crontab`, `/var/spool/cron/`)
+    for unauthorized entries and remove them. Analyze the process’s origin, user, and
+    parent process to trace the attack vector. Enhance endpoint monitoring to detect
+    crontab misuse and restrict crontab execution to authorized users. Implement file
+    integrity monitoring for cron directories and audit cron jobs regularly to prevent
+    persistence.
+  breed: file_access
+  mechanism: execution
+  tactic: persistence
+  technique: event_triggered_execution
+  subtechnique: cron
+  importance: critical
+  times:
+    - kind: times_per_proc
+      max: 2
+    - kind: times_per_exe
+      max: 4
+    - kind: times_per_full_ancestry
+      max: 4
+  arbitrary:
+    - how: AND
+      which: irrelevant
+      items:
+        - what: args
+          which: pertinent
+          pattern: .*\s-l\s.*
+  file_actions: execve
+  file_actions_how: any
+  bases:
+    - base: crontab
