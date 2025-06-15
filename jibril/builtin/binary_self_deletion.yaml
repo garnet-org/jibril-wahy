@@ -2,20 +2,9 @@
 # Binary executed self-deleted.
 #
 
-# # yaml-embedded-languages: shell
-# - format: shell
-#   code: |
-#     echo ""
-#     echo $REACTION_DATA | jq '
-#       .background.files.root.dirs[] |
-#       .files[]? // .dirs[]? |
-#       .files[]? |
-#       "\(.abs_path) (\(.actions| join("|")))"'
-#     echo ""
-
 - kind: binary_self_deletion
   name: binary_self_deletion
-  enabled: true
+  enabled: false
   version: 1.0
   description: Binary execution and self-deletion
   documentation: |
@@ -38,82 +27,3 @@
   file_actions_how: all
   bases:
     - regex: .*
-  reactions:
-    # yaml-embedded-languages: javascript
-    - format: js
-      code: |
-        function process(data) {
-          // Log event type and UUID using info helper.
-          let kind = data.metadata ? data.metadata.kind : "unknown";
-          let uuid = data.uuid || "no-uuid";
-          Info("Event type: " + kind);
-          Info("Event UUID: " + uuid);
-
-          // Log file actions if available.
-          if (data.file && data.file.actions) {
-            Info("File actions: " + data.file.actions);
-          }
-
-          // Test passing different types to helpers.
-          Info("Testing info helper with string.");
-          Warn("Testing warn helper with string.");
-          Error("Testing error helper with string.");
-
-          // Test open, write, read, close helpers.
-          let testPath = "/tmp/jibril_testfile";
-          let fd = Open(testPath);
-          Info("Opened file descriptor: " + fd);
-
-          let writeResult = Write(fd, "hello, world!");
-          Info("Write result: " + writeResult);
-
-          let readResult = Read(fd, "32");
-          Info("Read result: " + readResult);
-
-          let closeResult = Close(fd);
-          Info("Close result: " + closeResult);
-
-          // Test WriteFile and ReadFile helpers.
-          let wfResult = WriteFile(testPath, "hello, world!");
-          Info("WriteFile result: " + wfResult);
-
-          let rfResult = ReadFile(testPath);
-          Info("ReadFile result: " + rfResult);
-
-          // Test Stat helper.
-          let statResult = Stat(testPath);
-          Info("Stat result: " + statResult);
-
-          // Test Signal helper (will likely fail if no such PID).
-          let signalResult = Signal("1", "0");
-          Info("Signal result: " + signalResult);
-
-          // Test NetBlockIp and NetBlockDomain helpers.
-          let netBlockIpResult = NetBlockIp("127.0.0.1");
-          Info("NetBlockIp result: " + netBlockIpResult);
-
-          let netBlockDomainResult = NetBlockDomain("example.com");
-          Info("NetBlockDomain result: " + netBlockDomainResult);
-        }
-    - format: js
-      code: |
-        function process(data) {
-          // Check if user rafael is in /etc/passwd (just for testing).
-          let passwdContents = ReadFile("/etc/passwd");
-          let lines = passwdContents.split("\n");
-          let found = false;
-          for (let i = 0; i < lines.length; i++) {
-            let line = lines[i];
-            if (line.startsWith("rafael")) {
-              let fields = line.split(":");
-              let uid = fields[2];
-              let gid = fields[3];
-              Info("User rafael found. UID: " + uid + ", GID: " + gid + ".");
-              found = true;
-              break;
-            }
-          }
-          if (!found) {
-            Info("User rafael not found in /etc/passwd.");
-          }
-        }
