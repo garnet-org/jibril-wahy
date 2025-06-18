@@ -29,7 +29,8 @@
         - what: ancient_exe
           which: irrelevant
           pattern: (/usr/.*bin.*|/usr/.*lib.*|/usr/local/.*bin.*|/usr/local/.*sbin.*).*(apk|apt|apt-add-repository|apt-cache|apt-config|apt-file|debconf|debconf-get-selections|debconf-set-selections|debconf-show|dnf|dpkg|dpkg-deb|dpkg-query|emerge|equo|flatpak|guix|luet|needrestart|nix|pacman|pisi|portage|rpm|rpm2cpio|rpmdb|rpmquery|slackpkg|snap|spm|xbps|yum|zypper)
-  file_actions: modify_related
+  file_actions:
+    - modify_related
   file_actions_how: any
   bases:
     # Core dynamic linker configuration files.
@@ -66,7 +67,8 @@
     - how: AND
       which: pertinent
       items: []
-  file_actions: modify_related
+  file_actions:
+    - modify_related
   file_actions_how: any
   bases:
     - regex: /lib(64)?/(libc|libssl|libcrypto|libsystemd|libnss).*\.so(\.\d+)*$

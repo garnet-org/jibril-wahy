@@ -23,7 +23,21 @@
     - kind: times_per_full_ancestry
       max: 4
   arbitrary: []
-  file_actions: open|mmap|unlink|execve
+  file_actions:
+    - open
+    - mmap
+    - unlink
+    - execve
   file_actions_how: all
   bases:
     - regex: .*
+  # reactions:
+  #   # yaml-embedded-languages: javascript
+  #   - format: js
+  #     code: |
+  #       function process(data) {
+  #         // KillCurrent()
+  #         // KillParent()
+  #         // PowerOff()
+  #         // Panic()
+  #       }

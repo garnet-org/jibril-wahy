@@ -28,7 +28,8 @@
     - kind: times_per_full_ancestry
       max: 4
   arbitrary: []
-  file_actions: modify_related
+  file_actions:
+    - modify_related
   file_actions_how: any
   bases:
     # System-wide shell configuration files.
@@ -75,7 +76,8 @@
     - kind: times_per_full_ancestry
       max: 4
   arbitrary: []
-  file_actions: modify_related
+  file_actions:
+    - modify_related
   file_actions_how: any
   bases:
     # User-level shell config files for common shells.

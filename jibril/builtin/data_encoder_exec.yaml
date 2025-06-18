@@ -23,7 +23,8 @@
     - kind: times_per_full_ancestry
       max: 4
   arbitrary: []
-  file_actions: execve
+  file_actions:
+    - execve
   file_actions_how: any
   bases:
     - base: ascii85

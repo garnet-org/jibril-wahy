@@ -23,7 +23,8 @@
     - kind: times_per_full_ancestry
       max: 4
   arbitrary: []
-  file_actions: modify_related
+  file_actions:
+    - modify_related
   file_actions_how: any
   bases:
     - dir: /etc/security

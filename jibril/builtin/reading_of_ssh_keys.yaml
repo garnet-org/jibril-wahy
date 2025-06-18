@@ -1,0 +1,38 @@
+#
+# Reading of SSH keys detected.
+#
+
+- kind: reading_of_ssh_keys
+  name: reading_of_ssh_keys
+  enabled: false
+  version: 1.0
+  description: Reading of SSH keys detected
+  documentation: |
+    https://garnet.gitbook.io/jibril/detections/file-access/reading_of_ssh_keys
+  breed: file_access
+  mechanism: file_access
+  tactic: credential_access
+  technique: unsecured_credentials
+  importance: medium
+  times:
+    - kind: times_per_exe
+      max: 2
+    - kind: times_per_parent_exe
+      max: 4
+    - kind: times_per_full_ancestry
+      max: 4
+  file_actions:
+    - read
+  file_actions_how: any
+  arbitrary:
+    - how: AND
+      which: pertinent
+      items:
+        - what: cmd
+          pattern: "(containerd|sshd|ssh|scannercli|runc|update-ssh-keys|coreos-metadata|worker-[1-5])"
+          which: irrelevant
+        - what: args
+          pattern: "/(python|dist-packages)/"
+          which: irrelevant
+  bases:
+    - regex: "(authorized_keys|identity.pub|id_rsa.pub|id_rsa|ssh_config|id_dsa.pub|id_dsa|sshd_config|ssh_host_dsa_key.pub|ssh_host_dsa_key|ssh_host_rsa_key.pub|ssh_host_rsa_key|ssh_host_key.pub|ssh_host_key)$"

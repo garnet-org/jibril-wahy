@@ -28,7 +28,8 @@
     - kind: times_per_full_ancestry
       max: 1
   arbitrary: []
-  file_actions: access_related
+  file_actions:
+    - access_related
   file_actions_how: any
   bases:
     - dir: /proc
@@ -63,7 +64,8 @@
     - kind: times_per_full_ancestry
       max: 1
   arbitrary: []
-  file_actions: access_related
+  file_actions:
+    - access_related
   file_actions_how: any
   bases:
     - dir: /proc
@@ -106,7 +108,8 @@
     - kind: times_per_full_ancestry
       max: 1
   arbitrary: []
-  file_actions: access_related
+  file_actions:
+    - access_related
   file_actions_how: any
   bases:
     - dir: /proc
@@ -141,7 +144,8 @@
     - kind: times_per_full_ancestry
       max: 1
   arbitrary: []
-  file_actions: access_related
+  file_actions:
+    - access_related
   file_actions_how: any
   bases:
     - dir: /proc
@@ -198,7 +202,8 @@
     - kind: times_per_full_ancestry
       max: 1
   arbitrary: []
-  file_actions: access_related
+  file_actions:
+    - access_related
   file_actions_how: any
   bases:
     - regex: ^/proc/[0-9]+/cmdline$ # Cmdline args for cmds.
@@ -231,7 +236,8 @@
     - kind: times_per_full_ancestry
       max: 1
   arbitrary: []
-  file_actions: access_related
+  file_actions:
+    - access_related
   file_actions_how: any
   bases:
     - regex: ^/proc/[0-9]+/io$ # I/O usage of each process.
@@ -266,7 +272,8 @@
     - kind: times_per_full_ancestry
       max: 1
   arbitrary: []
-  file_actions: access_related
+  file_actions:
+    - access_related
   file_actions_how: any
   bases:
     - regex: ^/proc/[0-9]+/cgroup$ # Process cgroup information.
@@ -298,7 +305,8 @@
     - kind: times_per_full_ancestry
       max: 1
   arbitrary: []
-  file_actions: access_related
+  file_actions:
+    - access_related
   file_actions_how: any
   bases:
     - dir: /proc/sys/vm
@@ -326,7 +334,8 @@
     - kind: times_per_full_ancestry
       max: 1
   arbitrary: []
-  file_actions: access_related
+  file_actions:
+    - access_related
   file_actions_how: any
   bases:
     - dir: /proc/sys/kernel # Overlaps with some high importance files.
@@ -354,7 +363,8 @@
     - kind: times_per_full_ancestry
       max: 1
   arbitrary: []
-  file_actions: access_related
+  file_actions:
+    - access_related
   file_actions_how: any
   bases:
     - dir: /proc/sys/security
@@ -382,7 +392,8 @@
     - kind: times_per_full_ancestry
       max: 1
   arbitrary: []
-  file_actions: access_related
+  file_actions:
+    - access_related
   file_actions_how: any
   bases:
     - regex: /etc/security/.*$ # Security configuration files.

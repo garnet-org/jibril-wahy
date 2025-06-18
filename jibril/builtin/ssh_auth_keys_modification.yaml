@@ -1,0 +1,31 @@
+#
+# SSH authorized_keys file modification
+#
+
+- kind: ssh_authorized_keys_modification
+  name: ssh_authorized_keys_modification
+  enabled: false
+  version: 1.0
+  description: Unusual write or rename to SSH authorized_keys file
+  documentation: |
+    https://garnet.gitbook.io/jibril/detections/file-access/ssh_authorized_keys_modification
+  breed: file_access
+  mechanism: file_access
+  tactic: persistence
+  technique: account_manipulation
+  subtechnique: none
+  importance: critical
+  times:
+    - kind: times_per_exe
+      max: 2
+    - kind: times_per_parent_exe
+      max: 4
+    - kind: times_per_full_ancestry
+      max: 4
+  file_actions:
+    - write
+    - rename
+  file_actions_how: any
+  arbitrary: []
+  bases:
+    - base: authorized_keys

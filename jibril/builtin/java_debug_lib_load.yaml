@@ -34,7 +34,8 @@
         - what: ancient_exe
           which: irrelevant
           pattern: .*(java|javaw|jre|jdk).*
-  file_actions: mmap
+  file_actions:
+    - mmap
   file_actions_how: any
   bases:
     # Primary JDWP library.
