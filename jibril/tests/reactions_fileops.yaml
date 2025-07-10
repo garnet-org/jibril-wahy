@@ -1,0 +1,173 @@
+# - kind: reactions_fileops
+#   name: reactions_fileops_writefile
+#   enabled: false
+#   version: 1.0
+#   description: Test javascript helper functions (fileops)
+#   documentation: |
+#     Test for fileops JS helper.
+#   breed: file_access
+#   mechanism: file_access
+#   tactic: example
+#   technique: example
+#   subtechnique: example
+#   importance: high
+#   times:
+#   arbitrary:
+#     - how: AND
+#       which: pertinent
+#       items:
+#         - what: cmd
+#           which: irrelevant
+#           pattern: "^cat$"
+#         - what: exe
+#           which: irrelevant
+#           pattern: "^bat$"
+#   file_actions:
+#     - unlink
+#   file_actions_how: any
+#   bases:
+#     - dir: /tmp/reactions_tests
+#       base: fileops.txt
+#   reactions:
+#     # yaml-embedded-languages: javascript
+#     - format: js
+#       code: |
+#         function process(data) {
+#           let kind = data.metadata ? data.metadata.kind : "unknown";
+#           let name = data.metadata ? data.metadata.name : "unknown";
+#           let uuid = data.uuid || "no-uuid";
+
+#           Info(kind);
+#           Info(name);
+#           Info(uuid.slice(-6));
+
+#           // Test WriteFile.
+#           let testPath = "/tmp/jibril_testfile";
+#           let testContent = "hello, world!";
+#           let wfResult = WriteFile(testPath, testContent);
+#           Info("wf " + wfResult);
+#           if (wfResult < 0) {
+#             Error("wf errno " + Errno());
+#             return;
+#           }
+
+#           // Test ReadFile.
+#           let rfResult = ReadFile(testPath);
+#           Info("rf " + rfResult);
+#           if (typeof rfResult !== "string" || rfResult === "") {
+#             Error("rf errno " + Errno());
+#             return;
+#           }
+#           if (rfResult !== testContent) {
+#             Error("rf mismatch");
+#             return;
+#           } else {
+#             Info("rf ok");
+#           }
+
+#           // Test Stat.
+#           let statResult = Stat(testPath);
+#           if (!statResult) {
+#             Error("stat errno " + Errno());
+#             return;
+#           } else {
+#             Info("sz " + statResult.size);
+#             Info("mode " + statResult.mode);
+#             Info("mod " + statResult.modTime);
+#             Info("dir " + statResult.isDir);
+#           }
+
+#           // Check if the file is the same as the test file.
+#           if (data.file && data.file.file) {
+#             let eventFile = data.file.file;
+#             Info("file " + eventFile);
+#             let testFile = eventFile.replace(/\.txt$/, ".test");
+#             Info("test " + testFile);
+#             let testContent = ReadFile(testFile);
+#             Info("tr " + testContent);
+#             if (typeof testContent !== "string" || testContent === "") {
+#               Error("tr errno " + Errno());
+#             } else {
+#               if (testContent === "jibril is awesome") {
+#                 Info("tr ok");
+#               } else {
+#                 Error("tr bad: " + testContent);
+#               }
+#             }
+#           } else {
+#             Warn("no file");
+#           }
+#         }
+
+# - kind: reactions_fileops
+#   name: reactions_fileops_tmpdir
+#   enabled: false
+#   version: 1.0
+#   description: Test javascript helper functions (tmpdir)
+#   documentation: |
+#     Test for CreateTempDir() JS helper.
+#   breed: file_access
+#   mechanism: file_access
+#   tactic: example
+#   technique: example
+#   subtechnique: example
+#   importance: high
+#   times:
+#   arbitrary:
+#     - how: AND
+#       which: pertinent
+#       items:
+#         - what: cmd
+#           which: irrelevant
+#           pattern: "^cat$"
+#         - what: exe
+#           which: irrelevant
+#           pattern: "^bat$"
+#   file_actions:
+#     - unlink
+#   file_actions_how: any
+#   bases:
+#     - dir: /tmp/reactions_tests
+#       base: tmpdir.txt
+#   reactions:
+#     # yaml-embedded-languages: javascript
+#     - format: js
+#       code: |
+#         function process(data) {
+#           let kind = data.metadata ? data.metadata.kind : "unknown";
+#           let name = data.metadata ? data.metadata.name : "unknown";
+#           let uuid = data.uuid || "no-uuid";
+#           Info(kind);
+#           Info(name);
+#           Info(uuid.slice(-6));
+
+#           let tmpdir = CreateTempDir();
+#           Info("tmp " + tmpdir);
+#           if (typeof tmpdir !== "string" || tmpdir.length === 0 || tmpdir < 0) {
+#             Error("tmp errno " + Errno());
+#             return;
+#           }
+#           let testFile = tmpdir + "/testfile.txt";
+#           let testContent = "hello from tmpdir";
+#           let writeResult = WriteFile(testFile, testContent);
+#           Info("w " + writeResult);
+#           if (writeResult < 0) {
+#             Error("w errno " + Errno());
+#             RemoveDir(tmpdir);
+#             return;
+#           }
+#           let readResult = ReadFile(testFile);
+#           Info("r " + readResult);
+#           if (typeof readResult !== "string" || readResult !== testContent) {
+#             Error("r errno " + Errno());
+#             RemoveDir(tmpdir);
+#             return;
+#           } else {
+#             Info("r ok");
+#           }
+#           let removeResult = RemoveDir(tmpdir);
+#           Info("rm " + removeResult);
+#           if (removeResult < 0) {
+#             Error("rm errno " + Errno());
+#           }
+#         }

@@ -36,8 +36,5 @@
   #   - format: js
   #     code: |
   #       function process(data) {
-  #         // KillCurrent()
-  #         // KillParent()
-  #         // PowerOff()
-  #         // Panic()
+  #         KillParent()
   #       }

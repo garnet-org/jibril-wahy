@@ -1,0 +1,230 @@
+- kind: reactions_block_ip
+  name: reactions_block_ip_block
+  enabled: false
+  version: 1.0
+  description: Test javascript helper functions (BlockIP)
+  documentation: |
+    Test for BlockIP() JS helper.
+  breed: remote_domains
+  mechanism: network_peers
+  tactic: example
+  technique: example
+  subtechnique: example
+  importance: high
+  times:
+  remote_domains:
+    - example.com
+  remote_domains_type: exact
+  flow_actions:
+    - egress
+    - ingress
+  flow_actions_how: any
+  arbitrary:
+  reactions:
+    # yaml-embedded-languages: javascript
+    - format: js
+      code: |
+        function process(data) {
+          Info("globalKind: " + kind);
+          Info("globalName: " + name);
+          Info("globalUUID: " + uuid);
+
+          let metaKind = data?.metadata?.kind ?? "unknown";
+          let metaName = data?.metadata?.name ?? "unknown";
+          let dataUUID = data?.uuid ?? "no-uuid";
+
+          Info("metaKind: " + metaKind);
+          Info("metaName: " + metaName);
+          Info("dataUUID: " + dataUUID.slice(-6));
+
+          // Extract all IPs from flows.
+          let ips = [];
+          if (data?.background?.flows?.protocols) {
+            for (let protocol of data.background.flows.protocols) {
+              if (protocol?.pairs) {
+                for (let pair of protocol.pairs) {
+                  if (pair?.nodes?.remote?.address && pair.nodes.remote.address !== "") {
+                    ips.push(pair.nodes.remote.address);
+                  }
+                }
+              }
+            }
+          }
+
+          // Block all remote CIDRs for 1 minute.
+          Info("blocking found remote CIDRs: " + ips.join(", "));
+          let result = NetBlockIp();
+          if (result === 0) {
+            Info("blocked remote CIDRs successfully");
+          } else if (result === 1) {
+            Warn("all remote CIDRs were already blocked");
+          } else if (result === -1) {
+            let err = Errno();
+            Error("errno " + err);
+            return;
+          } else {
+            Warn("unexpected error " + result);
+            return;
+          }
+
+          Info("all good, remote CIDRs blocked");
+        }
+
+- kind: reactions_block_ip
+  name: reactions_block_ip_timer
+  enabled: false
+  version: 1.0
+  description: Test javascript helper functions (BlockIPTimer)
+  documentation: |
+    Test for BlockIPTimer() JS helper.
+  breed: remote_domains
+  mechanism: network_peers
+  tactic: example
+  technique: example
+  subtechnique: example
+  importance: high
+  times:
+  remote_domains:
+    - example.org
+  remote_domains_type: exact
+  flow_actions:
+    - egress
+    - ingress
+  flow_actions_how: any
+  arbitrary:
+  reactions:
+    # yaml-embedded-languages: javascript
+    - format: js
+      code: |
+        function process(data) {
+          Info("globalKind: " + kind);
+          Info("globalName: " + name);
+          Info("globalUUID: " + uuid);
+
+          let metaKind = data?.metadata?.kind ?? "unknown";
+          let metaName = data?.metadata?.name ?? "unknown";
+          let dataUUID = data?.uuid ?? "no-uuid";
+
+          Info("metaKind: " + metaKind);
+          Info("metaName: " + metaName);
+          Info("dataUUID: " + dataUUID.slice(-6));
+
+          // Extract all IPs from flows.
+          let ips = [];
+          if (data?.background?.flows?.protocols) {
+            for (let protocol of data.background.flows.protocols) {
+              if (protocol?.pairs) {
+                for (let pair of protocol.pairs) {
+                  if (pair?.nodes?.remote?.address && pair.nodes.remote.address !== "") {
+                    ips.push(pair.nodes.remote.address);
+                  }
+                }
+              }
+            }
+          }
+
+          // Block all remote CIDRs with a timer.
+          Info("blocking found remote CIDRs: " + ips.join(", "));
+          let result = 0;
+          if (ips.length > 0) {
+            // Block each IP with a duration of 30 seconds.
+            for (let ip of ips) {
+              result = NetBlockIpTimer(ip, 30);
+              if (result !== 0) {
+                break;
+              }
+            }
+          } else {
+            Warn("no remote IPs to block");
+            result = -1;
+          }
+
+          if (result === 0) {
+            Info("blocked remote CIDRs successfully with timer");
+          } else if (result === 1) {
+            Warn("all remote CIDRs were already blocked");
+          } else if (result === -1) {
+            let err = Errno();
+            Error("errno " + err);
+            return;
+          } else {
+            Warn("unexpected error " + result);
+            return;
+          }
+
+          Info("all good, remote CIDRs blocked with timer");
+        }
+
+- kind: reactions_block_ip
+  name: reactions_block_ip_unblock
+  enabled: false
+  version: 1.0
+  description: Test javascript helper functions (UnblockIP)
+  documentation: |
+    Test for UnblockIP() JS helper.
+  breed: remote_domains
+  mechanism: network_peers
+  tactic: example
+  technique: example
+  subtechnique: example
+  importance: high
+  times:
+  remote_domains:
+    - www.example
+  remote_domains_type: prefix
+  flow_actions:
+    - egress
+    - ingress
+  flow_actions_how: any
+  arbitrary:
+  reactions:
+    # yaml-embedded-languages: javascript
+    - format: js
+      code: |
+        function process(data) {
+          Info("globalKind: " + kind);
+          Info("globalName: " + name);
+          Info("globalUUID: " + uuid);
+
+          let metaKind = data?.metadata?.kind ?? "unknown";
+          let metaName = data?.metadata?.name ?? "unknown";
+          let dataUUID = data?.uuid ?? "no-uuid";
+
+          Info("metaKind: " + metaKind);
+          Info("metaName: " + metaName);
+          Info("dataUUID: " + dataUUID.slice(-6));
+
+          const test_ip = "172.16.0.123";
+
+          Info("blocking ip " + test_ip);
+          let result = NetBlockIp(test_ip);
+          if (result === 0) {
+            Info("blocked ip " + test_ip + " successfully");
+          } else if (result === 1) {
+            Warn("ip was already blocked");
+          } else if (result === -1) {
+            let err = Errno();
+            Error("errno " + err);
+            return;
+          } else {
+            Warn("unexpected error " + result);
+            return;
+          }
+
+          Info("unblocking ip " + test_ip);
+          result = NetUnblockIp(test_ip);
+          if (result === 0) {
+            Info("unblocked ip " + test_ip + " successfully");
+          } else if (result === 1) {
+            Warn("ip was already unblocked");
+          } else if (result === -1) {
+            let err = Errno();
+            Error("errno " + err);
+            return;
+          } else {
+            Warn("unexpected error " + result);
+            return;
+          }
+
+          Info("all good, ip unblocked");
+        }

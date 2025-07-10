@@ -1,0 +1,75 @@
+- kind: reactions_block_domain
+  name: reactions_block_domain_block
+  enabled: true
+  version: 1.0
+  description: Test javascript helper functions (BlockDomain)
+  documentation: |
+    Test for BlockDomain() JS helper.
+  breed: remote_domains
+  mechanism: network_peers
+  tactic: example
+  technique: example
+  subtechnique: example
+  importance: high
+  times:
+  remote_domains:
+    - example.com
+  remote_domains_type: exact
+  flow_actions:
+    - egress
+    - ingress
+  flow_actions_how: any
+  arbitrary:
+  reactions:
+    # yaml-embedded-languages: javascript
+    - format: js
+      code: |
+        function process(data) {
+          Info("globalKind: " + kind);
+          Info("globalName: " + name);
+          Info("globalUUID: " + uuid);
+
+          let metaKind = data?.metadata?.kind ?? "unknown";
+          let metaName = data?.metadata?.name ?? "unknown";
+          let dataUUID = data?.uuid ?? "no-uuid";
+
+          Info("metaKind: " + metaKind);
+          Info("metaName: " + metaName);
+          Info("dataUUID: " + dataUUID.slice(-6));
+
+          // Extract all domains from flows.
+          let domains = [];
+          if (data?.background?.flows?.protocols) {
+            for (let protocol of data.background.flows.protocols) {
+              if (protocol?.pairs) {
+                for (let pair of protocol.pairs) {
+                  if (pair?.nodes?.remote?.names) {
+                    for (let name of pair.nodes.remote.names) {
+                      if (name && name !== "") {
+                        domains.push(name);
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+
+          // Block all remote domains for 1 minute.
+          Info("blocking found remote domains: " + domains.join(", "));
+          let result = NetBlockDomain();
+          if (result === 0) {
+            Info("blocked remote domains successfully");
+          } else if (result === 1) {
+            Warn("all remote domains were already blocked");
+          } else if (result === -1) {
+            let err = Errno();
+            Error("errno " + err);
+            return;
+          } else {
+            Warn("unexpected error " + result);
+            return;
+          }
+
+          Info("all good, remote domains blocked");
+        }

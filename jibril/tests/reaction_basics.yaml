@@ -1,0 +1,47 @@
+# - kind: reactions_basics
+#   name: reactions_basics_logging
+#   enabled: false
+#   version: 1.0
+#   description: Test javascript helper functions (logging)
+#   documentation: |
+#     Test for logging JS helper.
+#   breed: file_access
+#   mechanism: file_access
+#   tactic: example
+#   technique: example
+#   subtechnique: example
+#   importance: high
+#   times:
+#   arbitrary:
+#     - how: AND
+#       which: pertinent
+#       items:
+#         - what: cmd
+#           which: irrelevant
+#           pattern: "^cat$"
+#         - what: exe
+#           which: irrelevant
+#           pattern: "^bat$"
+#   file_actions:
+#     - unlink
+#   file_actions_how: any
+#   bases:
+#     - dir: /tmp/reactions_tests
+#       base: logging.txt
+#   reactions:
+#     # yaml-embedded-languages: javascript
+#     - format: js
+#       code: |
+#         function process(data) {
+#           let kind = data.metadata ? data.metadata.kind : "unknown";
+#           let name = data.metadata ? data.metadata.name : "unknown";
+#           let uuid = data.uuid || "no-uuid";
+
+#           Info(kind);
+#           Info(name);
+#           Info(uuid.slice(-6));
+
+#           Info("info");
+#           Warn("warn");
+#           Error("error");
+#         }

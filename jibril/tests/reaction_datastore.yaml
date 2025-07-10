@@ -1,0 +1,183 @@
+# - kind: reactions_datastore
+#   name: reactions_datastore
+#   enabled: false
+#   version: 1.0
+#   description: Test javascript helper functions (datastore)
+#   documentation: |
+#     Test for datastore JS helper.
+#   breed: file_access
+#   mechanism: file_access
+#   tactic: example
+#   technique: example
+#   subtechnique: example
+#   importance: high
+#   times:
+#   arbitrary:
+#     - how: AND
+#       which: pertinent
+#       items:
+#         - what: cmd
+#           which: irrelevant
+#           pattern: "^cat$"
+#         - what: exe
+#           which: irrelevant
+#           pattern: "^bat$"
+#   file_actions:
+#     - unlink
+#   file_actions_how: any
+#   bases:
+#     - dir: /tmp/reactions_tests
+#       base: datastore.txt
+#   reactions:
+#     # yaml-embedded-languages: javascript
+#     - format: js
+#       code: |
+#         function process(data) {
+#           let kind = data.metadata ? data.metadata.kind : "unknown";
+#           let name = data.metadata ? data.metadata.name : "unknown";
+#           let uuid = data.uuid || "no-uuid";
+
+#           Info(kind);
+#           Info(name);
+#           Info(uuid.slice(-6));
+
+#           // Test DataPush.
+#           Info("DataPush and DataPop");
+#           Info("push hello");
+#           let result = DataPush("hello");
+#           if (result !== 0) {
+#             Error("DataPush error: " + Errno());
+#           }
+#           Info("push world");
+#           result = DataPush("world");
+#           if (result !== 0) {
+#             Error("DataPush error: " + Errno());
+#           }
+
+#           // Test DataPop.
+#           let value = DataPop();
+#           Info("pop " + value);
+#           if (value !== "world" && value !== "") {
+#             Error("Expected 'world', got '" + value + "'");
+#           }
+#           if (value === "") {
+#             Error("DataPop error: " + Errno());
+#           }
+#           value = DataPop();
+#           Info("pop " + value);
+#           if (value !== "hello" && value !== "") {
+#             Error("Expected 'hello', got '" + value + "'");
+#           }
+#           if (value === "") {
+#             Error("DataPop error: " + Errno());
+#           }
+
+#           // Test DataSet and DataGet.
+#           let setResult = DataSet("key1", "value1");
+#           if (setResult !== 0) {
+#             Error("DataSet error: " + Errno());
+#           }
+#           let getValue = DataGet("key1");
+#           Info("get key1: " + getValue);
+#           if (getValue !== "value1") {
+#             Error("Expected 'value1', got '" + getValue + "'");
+#           }
+
+#           // Test DataHasKey.
+#           let hasKey = DataHasKey("key1");
+#           Info("has key1: " + hasKey);
+#           if (hasKey !== true) {
+#             Error("Expected key1 to exist, got " + hasKey);
+#           }
+#           hasKey = DataHasKey("key2");
+#           Info("has key2: " + hasKey);
+#           if (hasKey !== false) {
+#             Error("Expected key2 to not exist, got " + hasKey);
+#           }
+
+#           // Test DataHasValue.
+#           let hasValue = DataHasValue("value1");
+#           Info("has value1: " + hasValue);
+#           if (hasValue !== true) {
+#             Error("Expected value1 to exist, got " + hasValue);
+#           }
+#           hasValue = DataHasValue("value2");
+#           Info("has value2: " + hasValue);
+#           if (hasValue !== false) {
+#             Error("Expected value2 to not exist, got " + hasValue);
+#           }
+
+#           // Add more key-value pairs for testing DataKeys and DataValues.
+#           DataSet("key2", "value2");
+#           DataSet("key3", "value3");
+
+#           // Test DataKeys and DataValues.
+#           let keys = DataKeys();
+#           Info("keys: " + keys);
+#           try {
+#             let keysArr = JSON.parse(keys);
+#             if (!Array.isArray(keysArr) || keysArr.length < 3) {
+#               Error("DataKeys error: Expected at least 3 keys, got " + keysArr.length);
+#             }
+#           } catch (e) {
+#             Error("DataKeys not valid JSON: " + keys);
+#           }
+
+#           let values = DataValues();
+#           Info("values: " + values);
+#           try {
+#             let valuesArr = JSON.parse(values);
+#             if (!Array.isArray(valuesArr) || valuesArr.length < 3) {
+#               Error("DataValues error: Expected at least 3 values, got " + valuesArr.length);
+#             }
+#           } catch (e) {
+#             Error("DataValues not valid JSON: " + values);
+#           }
+
+#           // Test DataSize and DataIsEmpty.
+#           let size = DataSize();
+#           Info("size: " + size);
+#           // Adjusted error checking for DataSize to avoid failing on 'undefined'.
+#           if (typeof size === 'undefined') {
+#             Error("DataSize error: size is undefined");
+#           } else if (size < 3) {  // Should be at least 3 after setting key1, key2, key3.
+#             Error("DataSize error: Expected size to be at least 3, got " + size);
+#           }
+#           let isEmpty = DataIsEmpty();
+#           Info("is empty: " + isEmpty);
+#           if (isEmpty !== false) {  // Should be false after setting keys.
+#             Error("DataIsEmpty error: " + Errno());
+#           }
+
+#           // Test DataDelete.
+#           let deleteResult = DataDelete("key1");
+#           if (deleteResult < 0) {
+#             Error("DataDelete error: " + Errno());
+#           }
+#           getValue = DataGet("key1");
+#           if (getValue !== "") {
+#             Error("Expected empty string but got: " + getValue);
+#           }
+
+#           // Test DataClear.
+#           // Add some data before clearing to ensure clear works.
+#           DataSet("tempKey1", "tempValue1");
+#           DataSet("tempKey2", "tempValue2");
+#           let clearResult = DataClear();
+#           if (clearResult !== 0) {
+#             Error("DataClear error: " + Errno());
+#           }
+#           size = DataSize();
+#           // Adjusted error checking for DataSize after clear to avoid failing on 'undefined'.
+#           if (typeof size === 'undefined') {
+#             Error("DataSize error: size is undefined after clear");
+#           } else if (size !== 0) {
+#             Error("Expected size to be 0 after clear, got " + size);
+#           }
+#           Info("size after clear: " + size);
+#           isEmpty = DataIsEmpty();
+#           if (isEmpty !== true) {
+#             Error("Expected DataIsEmpty to be true after clear, got " + isEmpty);
+#           }
+#           Info("is empty after clear: " + isEmpty);
+#         }
