@@ -1,6 +1,6 @@
 - kind: reactions_block_domain
   name: reactions_block_domain_block
-  enabled: true
+  enabled: false
   version: 1.0
   description: Test javascript helper functions (BlockDomain)
   documentation: |
@@ -13,7 +13,7 @@
   importance: high
   times:
   remote_domains:
-    - example.com
+    - www.example.com
   remote_domains_type: exact
   flow_actions:
     - egress

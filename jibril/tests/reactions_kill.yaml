@@ -1,179 +1,179 @@
-# - kind: reactions_kill
-#   name: reactions_kill_process
-#   enabled: false
-#   version: 1.0
-#   description: Test javascript helper functions (kill_process)
-#   documentation: |
-#     Test for KillProcess() JS helper.
-#   breed: file_access
-#   mechanism: file_access
-#   tactic: example
-#   technique: example
-#   subtechnique: example
-#   importance: high
-#   times:
-#   arbitrary:
-#     - how: AND
-#       which: pertinent
-#       items:
-#         - what: cmd
-#           which: irrelevant
-#           pattern: "^cat$"
-#         - what: exe
-#           which: irrelevant
-#           pattern: "^bat$"
-#   file_actions:
-#     - unlink
-#   file_actions_how: any
-#   bases:
-#     - dir: /tmp/reactions_tests
-#       base: kill_process.txt
-#   reactions:
-#     # yaml-embedded-languages: javascript
-#     - format: js
-#       code: |
-#         function process(data) {
-#           let kind = data?.metadata?.kind ?? "unknown";
-#           let name = data?.metadata?.name ?? "unknown";
-#           let uuid = data?.uuid ?? "no-uuid";
-#           Info(kind);
-#           Info(name);
-#           Info(uuid.slice(-6));
+- kind: reactions_kill
+  name: reactions_kill_process
+  enabled: false
+  version: 1.0
+  description: Test javascript helper functions (kill_process)
+  documentation: |
+    Test for KillProcess() JS helper.
+  breed: file_access
+  mechanism: file_access
+  tactic: example
+  technique: example
+  subtechnique: example
+  importance: high
+  times:
+  arbitrary:
+    - how: AND
+      which: pertinent
+      items:
+        - what: cmd
+          which: irrelevant
+          pattern: "^cat$"
+        - what: exe
+          which: irrelevant
+          pattern: "^bat$"
+  file_actions:
+    - unlink
+  file_actions_how: any
+  bases:
+    - dir: /tmp/reactions_tests
+      base: kill_process.txt
+  reactions:
+    # yaml-embedded-languages: javascript
+    - format: js
+      code: |
+        function process(data) {
+          let kind = data?.metadata?.kind ?? "unknown";
+          let name = data?.metadata?.name ?? "unknown";
+          let uuid = data?.uuid ?? "no-uuid";
+          Info(kind);
+          Info(name);
+          Info(uuid.slice(-6));
 
-#           let ancestry = data?.background?.ancestry;
-#           if (!Array.isArray(ancestry) || ancestry.length === 0) {
-#             Error("no ancestry");
-#             return;
-#           }
-#           let proc = null;
-#           for (let i = ancestry.length - 1; i >= 0; i--) {
-#             let comm = ancestry[i]?.comm;
-#             if (comm === "kill_process.sh") {
-#               Info("found");
-#               proc = ancestry[i];
-#               break;
-#             }
-#           }
-#           if (!proc) {
-#             Error("not found");
-#             return;
-#           }
-#           if (typeof proc.pid !== "number") {
-#             Error("no pid");
-#             return;
-#           }
-#           let pid = proc.pid;
-#           Info("kill " + pid);
-#           let result = KillProcess(pid);
-#           Info("res " + result);
-#           if (result < 0) {
-#             Error("fail " + Errno());
-#           } else {
-#             Info("ok " + pid);
-#           }
-#         }
+          let ancestry = data?.background?.ancestry;
+          if (!Array.isArray(ancestry) || ancestry.length === 0) {
+            Error("no ancestry");
+            return;
+          }
+          let proc = null;
+          for (let i = ancestry.length - 1; i >= 0; i--) {
+            let comm = ancestry[i]?.comm;
+            if (comm === "kill_process.sh") {
+              Info("found");
+              proc = ancestry[i];
+              break;
+            }
+          }
+          if (!proc) {
+            Error("not found");
+            return;
+          }
+          if (typeof proc.pid !== "number") {
+            Error("no pid");
+            return;
+          }
+          let pid = proc.pid;
+          Info("kill " + pid);
+          let result = KillProcess(pid);
+          Info("res " + result);
+          if (result < 0) {
+            Error("fail " + Errno());
+          } else {
+            Info("ok " + pid);
+          }
+        }
 
-# - kind: reactions_kill
-#   name: reactions_kill_current
-#   enabled: false
-#   version: 1.0
-#   description: Test javascript helper functions (kill_current)
-#   documentation: |
-#     Test for KillCurrent() JS helper.
-#   breed: file_access
-#   mechanism: file_access
-#   tactic: example
-#   technique: example
-#   subtechnique: example
-#   importance: high
-#   times:
-#   arbitrary:
-#   bases:
-#     - dir: /tmp/reactions_tests
-#       base: kill_current.txt
-#   reactions:
-#     # yaml-embedded-languages: javascript
-#     - format: js
-#       code: |
-#         function process(data) {
-#           let kind = data?.metadata?.kind ?? "unknown";
-#           let name = data?.metadata?.name ?? "unknown";
-#           let uuid = data?.uuid ?? "no-uuid";
-#           Info(kind);
-#           Info(name);
-#           Info(uuid.slice(-6));
+- kind: reactions_kill
+  name: reactions_kill_current
+  enabled: false
+  version: 1.0
+  description: Test javascript helper functions (kill_current)
+  documentation: |
+    Test for KillCurrent() JS helper.
+  breed: file_access
+  mechanism: file_access
+  tactic: example
+  technique: example
+  subtechnique: example
+  importance: high
+  times:
+  arbitrary:
+  bases:
+    - dir: /tmp/reactions_tests
+      base: kill_current.txt
+  reactions:
+    # yaml-embedded-languages: javascript
+    - format: js
+      code: |
+        function process(data) {
+          let kind = data?.metadata?.kind ?? "unknown";
+          let name = data?.metadata?.name ?? "unknown";
+          let uuid = data?.uuid ?? "no-uuid";
+          Info(kind);
+          Info(name);
+          Info(uuid.slice(-6));
 
-#           let ancestry = data?.background?.ancestry;
-#           if (!Array.isArray(ancestry) || ancestry.length === 0) {
-#             Error("no ancestry");
-#             return;
-#           }
-#           Info("kill current");
-#           let result = KillCurrent();
-#           Info("res " + result);
-#           if (result === -1) {
-#             Error("fail " + Errno());
-#           } else if (result === 1) {
-#             Info("already exited");
-#           } else if (result === 0) {
-#             Info("killed");
-#           } else {
-#             Error("bad ret " + result);
-#           }
-#         }
+          let ancestry = data?.background?.ancestry;
+          if (!Array.isArray(ancestry) || ancestry.length === 0) {
+            Error("no ancestry");
+            return;
+          }
+          Info("kill current");
+          let result = KillCurrent();
+          Info("res " + result);
+          if (result === -1) {
+            Error("fail " + Errno());
+          } else if (result === 1) {
+            Info("already exited");
+          } else if (result === 0) {
+            Info("killed");
+          } else {
+            Error("bad ret " + result);
+          }
+        }
 
-# - kind: reactions_tests
-#   name: reactions_tests_kill_parent
-#   enabled: false
-#   version: 1.0
-#   description: Test javascript helper functions (kill_parent)
-#   documentation: |
-#     Test for KillParent() JS helper.
-#   breed: file_access
-#   mechanism: file_access
-#   tactic: example
-#   technique: example
-#   subtechnique: example
-#   importance: high
-#   times:
-#   arbitrary:
-#     - how: AND
-#       which: pertinent
-#       items:
-#         - what: cmd
-#           which: irrelevant
-#           pattern: "^cat$"
-#         - what: exe
-#           which: irrelevant
-#           pattern: "^bat$"
-#   file_actions:
-#     - unlink
-#   file_actions_how: any
-#   bases:
-#     - dir: /tmp/reactions_tests
-#       base: kill_parent.txt
-#   reactions:
-#     # yaml-embedded-languages: javascript
-#     - format: js
-#       code: |
-#         function process(data) {
-#           let kind = data?.metadata?.kind ?? "unknown";
-#           let name = data?.metadata?.name ?? "unknown";
-#           let uuid = data?.uuid ?? "no-uuid";
-#           Info(kind);
-#           Info(name);
-#           Info(uuid.slice(-6));
+- kind: reactions_tests
+  name: reactions_tests_kill_parent
+  enabled: false
+  version: 1.0
+  description: Test javascript helper functions (kill_parent)
+  documentation: |
+    Test for KillParent() JS helper.
+  breed: file_access
+  mechanism: file_access
+  tactic: example
+  technique: example
+  subtechnique: example
+  importance: high
+  times:
+  arbitrary:
+    - how: AND
+      which: pertinent
+      items:
+        - what: cmd
+          which: irrelevant
+          pattern: "^cat$"
+        - what: exe
+          which: irrelevant
+          pattern: "^bat$"
+  file_actions:
+    - unlink
+  file_actions_how: any
+  bases:
+    - dir: /tmp/reactions_tests
+      base: kill_parent.txt
+  reactions:
+    # yaml-embedded-languages: javascript
+    - format: js
+      code: |
+        function process(data) {
+          let kind = data?.metadata?.kind ?? "unknown";
+          let name = data?.metadata?.name ?? "unknown";
+          let uuid = data?.uuid ?? "no-uuid";
+          Info(kind);
+          Info(name);
+          Info(uuid.slice(-6));
 
-#           Info("kill parent");
-#           let result = KillParent();
-#           Info("res " + result);
-#           if (result === -1) {
-#             Error("fail " + Errno());
-#           } else if (result === 1) {
-#             Info("already exited");
-#           } else if (result === 0) {
-#             Info("killed");
-#           } else {
-#             Error("bad ret " + result);
-#           }
-#         }
+          Info("kill parent");
+          let result = KillParent();
+          Info("res " + result);
+          if (result === -1) {
+            Error("fail " + Errno());
+          } else if (result === 1) {
+            Info("already exited");
+          } else if (result === 0) {
+            Info("killed");
+          } else {
+            Error("bad ret " + result);
+          }
+        }
