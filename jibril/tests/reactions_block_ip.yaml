@@ -1,6 +1,6 @@
 - kind: reactions_block_ip
   name: reactions_block_ip_block
-  enabled: true
+  enabled: false
   version: 1.0
   description: Test javascript helper functions (BlockIP)
   documentation: |
